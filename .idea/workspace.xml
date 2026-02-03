@@ -5,27 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0d80dc1-35b7-4b6f-8b4a-93fe390e4b77" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/Microservices.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.agent.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.ask2agent.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.edit.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/go.imports.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/broker-service/broker-service.dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/broker-service/cmd/api/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/broker-service/cmd/api/routes.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/broker-service/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/broker-service/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/project/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/cmd/web/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/cmd/web/templates/base.layout.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/base.layout.gohtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/cmd/web/templates/footer.partial.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/footer.partial.gohtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/cmd/web/templates/header.partial.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/header.partial.gohtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/cmd/web/templates/test.page.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/go.mod" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/broker-service/cmd/api/helpers.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/broker-service/broker-service.dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/broker-service.dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/project/docker-compose.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,6 +35,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
 }</component>
@@ -82,6 +73,8 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\Golang\Microservices" />
+      <recent name="F:\Golang\Microservices\project" />
       <recent name="F:\Golang\Microservices\broker-service" />
     </key>
   </component>
@@ -105,6 +98,17 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
