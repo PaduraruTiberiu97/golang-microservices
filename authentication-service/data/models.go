@@ -28,7 +28,7 @@ func New(dbPool *sql.DB) Models {
 // in this type is available to us throughout the application, anywhere that the
 // app variable is used, provided that the model is also added in the New function.
 type Models struct {
-	User User
+	Users User
 }
 
 // User is the structure which holds one user from the database.
