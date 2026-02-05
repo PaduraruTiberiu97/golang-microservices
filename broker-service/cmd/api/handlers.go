@@ -25,10 +25,6 @@ func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = app.writeJSON(w, http.StatusOK, payload)
-	out, _ := json.MarshalIndent(payload, "", "\t")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusAccepted)
-	w.Write(out)
 }
 
 func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
@@ -74,8 +70,9 @@ func (app *Config) authenticate(w http.ResponseWriter, r *http.Request, authPayl
 	defer response.Body.Close()
 
 	// make sure we get back the correct status code
-	if response.StatusCode != http.StatusUnauthorized {
+	if response.StatusCode == http.StatusUnauthorized {
 		_ = app.errorJSON(w, errors.New("Invalid credentials"))
+		return
 	} else if response.StatusCode != http.StatusAccepted {
 		_ = app.errorJSON(w, errors.New("Error calling auth service"))
 		return
