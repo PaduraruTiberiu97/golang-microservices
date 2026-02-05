@@ -20,7 +20,7 @@ func New(dbPool *sql.DB) Models {
 	db = dbPool
 
 	return Models{
-		User: User{},
+		Users: User{},
 	}
 }
 
