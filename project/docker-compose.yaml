@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
     broker-service:
@@ -12,6 +10,24 @@ services:
       deploy:
         mode: replicated
         replicas: 1
+
+    mail-service:
+      build:
+        context: ./../mail-service
+        dockerfile: ./../mail-service/mail-service.dockerfile
+      restart: always
+      deploy:
+        mode: replicated
+        replicas: 1
+      environment:
+        MAIL_DOMAIN: localhost
+        MAIL_HOST: mailhog
+        MAIL_PORT: 1025
+        MAIL_ENCRYPTION: none
+        MAIL_USERNAME: ""
+        MAIL_PASSWORD: ""
+        MAIL_NAME: "TIBERIU PAD"
+        MAIL_ADDRESS: "TIBERIUPAD@gmail.COM"
 
     logger-service:
       build:
@@ -60,4 +76,9 @@ services:
       volumes:
         - ./db-data/mongo/:/data/db
 
+    mailhog:
+      image: 'mailhog/mailhog:latest'
+      ports:
+        - "1025:1025"
+        - "8025:8025"
 

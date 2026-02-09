@@ -4,13 +4,16 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f0d80dc1-35b7-4b6f-8b4a-93fe390e4b77" name="Changes" comment="add logger service">
-      <change afterPath="$PROJECT_DIR$/logger-service/cmd/logger-service.dockerfile" afterDir="false" />
+    <list default="true" id="f0d80dc1-35b7-4b6f-8b4a-93fe390e4b77" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-service/cmd/api/handlers.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/broker-service/brokerApp" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/brokerApp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/project/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/project/docker-compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/routes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/handlers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/routes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logger-service/cmd/logger-service.dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/logger-service.dockerfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,7 +57,7 @@
     <urls />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="DEPENDENCY_CHECKER_PROBLEMS_TAB" />
+    <option name="selectedTabId" value="com.goide.dfa.ui.problems.view" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
@@ -86,11 +89,11 @@
     "go.sdk.automatically.set": "true",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/Users/tiberiu/Work/golang-projects/golang-microservices/logger-service/cmd",
+    "last_opened_file_path": "/Users/tiberiu/Work/golang-projects/golang-microservices",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.keymap",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "to.speed.mode.migration.done": "true"
   }
 }]]></component>
@@ -100,6 +103,7 @@
       <recent name="$PROJECT_DIR$/logger-service/cmd/api" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/logger-service" />
       <recent name="F:\Golang\Microservices\authentication-service" />
       <recent name="F:\Golang\Microservices" />
       <recent name="F:\Golang\Microservices\project" />
@@ -178,7 +182,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="add logger service," />
     <MESSAGE value="add logger service" />
-    <option name="LAST_COMMIT_MESSAGE" value="add logger service" />
+    <MESSAGE value="fix logger start up, add logger docker setup" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix logger start up, add logger docker setup" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
