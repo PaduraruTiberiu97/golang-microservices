@@ -1,3 +1,4 @@
+// Package main wires broker HTTP routes and middleware.
 package main
 
 import (
@@ -23,9 +24,9 @@ func (app *Config) routes() http.Handler {
 
 	mux.Use(middleware.Heartbeat("/ping"))
 
-	mux.Post("/", app.Broker)
+	mux.Post("/", app.handleBroker)
 
-	mux.Post("/handle", app.HandleSubmission)
+	mux.Post("/handle", app.handleSubmission)
 
 	mux.Post("/log-grpc", app.logViaGRPC)
 

@@ -1,8 +1,9 @@
+// Package main defines mail-service HTTP handlers.
 package main
 
 import "net/http"
 
-func (app *Config) sendMail(w http.ResponseWriter, r *http.Request) {
+func (app *Config) handleSendMail(w http.ResponseWriter, r *http.Request) {
 	type mailMessage struct {
 		From    string `json:"from"`
 		To      string `json:"to"`
@@ -12,9 +13,9 @@ func (app *Config) sendMail(w http.ResponseWriter, r *http.Request) {
 
 	var requestPayload mailMessage
 
-	err := app.ReadJSON(w, r, &requestPayload)
+	err := app.decodeJSON(w, r, &requestPayload)
 	if err != nil {
-		app.errorJSON(w, err)
+		app.writeErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -25,9 +26,9 @@ func (app *Config) sendMail(w http.ResponseWriter, r *http.Request) {
 		Data:    requestPayload.Message,
 	}
 
-	err = app.Mailer.SendSmtpMessage(msg)
+	err = app.Mailer.SendSMTPMessage(msg)
 	if err != nil {
-		app.errorJSON(w, err)
+		app.writeErrorJSON(w, err)
 		return
 	}
 
@@ -36,5 +37,5 @@ func (app *Config) sendMail(w http.ResponseWriter, r *http.Request) {
 		Message: "sent to " + requestPayload.To,
 	}
 
-	app.writeJSON(w, http.StatusAccepted, payload)
+	_ = app.writeJSON(w, http.StatusAccepted, payload)
 }

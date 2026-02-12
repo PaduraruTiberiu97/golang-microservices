@@ -1,3 +1,4 @@
+// Package main wires logger-service HTTP routes and middleware.
 package main
 
 import (
@@ -23,7 +24,7 @@ func (app *Config) routes() http.Handler {
 
 	mux.Use(middleware.Heartbeat("/ping"))
 
-	mux.Post("/log", app.WriteLog)
+	mux.Post("/log", app.handleWriteLog)
 
 	return mux
 }

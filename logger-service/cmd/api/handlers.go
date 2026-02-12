@@ -1,3 +1,4 @@
+// Package main defines logger-service HTTP handlers.
 package main
 
 import (
@@ -6,15 +7,18 @@ import (
 	"net/http"
 )
 
-type JSONPayload struct {
+type LogRequestPayload struct {
 	Name string `json:"name"`
 	Data string `json:"data"`
 }
 
-func (app *Config) WriteLog(w http.ResponseWriter, r *http.Request) {
+func (app *Config) handleWriteLog(w http.ResponseWriter, r *http.Request) {
 	// read JSON into var
-	var requestPayload JSONPayload
-	_ = app.ReadJSON(w, r, &requestPayload)
+	var requestPayload LogRequestPayload
+	if err := app.decodeJSON(w, r, &requestPayload); err != nil {
+		_ = app.writeErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
 
 	// insert data
 	event := data.LogEntry{
@@ -24,8 +28,9 @@ func (app *Config) WriteLog(w http.ResponseWriter, r *http.Request) {
 
 	err := app.Models.LogEntry.Insert(event)
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		log.Println("Error trying to insert", err)
+		return
 	}
 
 	resp := JsonResponse{

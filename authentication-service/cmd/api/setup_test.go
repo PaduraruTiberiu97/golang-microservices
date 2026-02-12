@@ -1,3 +1,4 @@
+// Package main provides shared test setup for authentication handlers.
 package main
 
 import (
@@ -10,7 +11,7 @@ var testApp Config
 
 func TestMain(m *testing.M) {
 	repo := data.NewPostgresTestRepository(nil)
-	testApp.Repo = repo
+	testApp.Repository = repo
 
 	os.Exit(m.Run())
 }

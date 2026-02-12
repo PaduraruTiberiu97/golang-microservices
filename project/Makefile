@@ -1,3 +1,4 @@
+# Build and local orchestration helpers for the microservices stack.
 #SHELL=cmd.exe
 #FRONT_END_BINARY=frontApp.exe
 #BROKER_BINARY=brokerApp

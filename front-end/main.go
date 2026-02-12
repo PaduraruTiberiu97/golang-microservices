@@ -1,3 +1,4 @@
+// Package main runs the UI that exercises broker-service test actions.
 package main
 
 import (
@@ -10,32 +11,29 @@ import (
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		render(w, "test.page.gohtml")
+		renderTemplate(w, "test.page.gohtml")
 	})
 
 	fmt.Println("Starting front end service on port 8081")
-	err := http.ListenAndServe(":8081", nil)
-	if err != nil {
+	if err := http.ListenAndServe(":8081", nil); err != nil {
 		log.Panic(err)
 	}
 }
 
-func render(w http.ResponseWriter, t string) {
-
+func renderTemplate(w http.ResponseWriter, pageTemplate string) {
 	partials := []string{
 		"templates/base.layout.gohtml",
 		"templates/header.partial.gohtml",
 		"templates/footer.partial.gohtml",
 	}
 
-	var templateSlice []string
-	templateSlice = append(templateSlice, fmt.Sprintf("templates/%s", t))
+	templatePaths := []string{fmt.Sprintf("templates/%s", pageTemplate)}
 
-	for _, x := range partials {
-		templateSlice = append(templateSlice, x)
+	for _, partial := range partials {
+		templatePaths = append(templatePaths, partial)
 	}
 
-	tmpl, err := template.ParseFiles(templateSlice...)
+	tmpl, err := template.ParseFiles(templatePaths...)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

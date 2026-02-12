@@ -1,3 +1,4 @@
+// Package main contains shared HTTP/JSON helpers for the authentication API.
 package main
 
 import (
@@ -13,7 +14,7 @@ type JsonResponse struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-func (app *Config) readJSON(w http.ResponseWriter, r *http.Request, data any) error {
+func (app *Config) decodeJSON(w http.ResponseWriter, r *http.Request, data any) error {
 	maxBytes := 1048576 // 1MB
 
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
@@ -54,7 +55,7 @@ func (app *Config) writeJSON(w http.ResponseWriter, status int, data any, header
 	return nil
 }
 
-func (app *Config) errorJSON(w http.ResponseWriter, err error, status ...int) error {
+func (app *Config) writeErrorJSON(w http.ResponseWriter, err error, status ...int) error {
 	statusCode := 200
 
 	if len(status) > 0 {

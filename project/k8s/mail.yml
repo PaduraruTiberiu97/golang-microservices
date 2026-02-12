@@ -1,3 +1,4 @@
+# Kubernetes deployment and service for mailer-service.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

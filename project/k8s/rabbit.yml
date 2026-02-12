@@ -1,3 +1,4 @@
+# Kubernetes deployment and service for RabbitMQ.
 
 apiVersion: apps/v1
 kind: Deployment

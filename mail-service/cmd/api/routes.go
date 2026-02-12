@@ -1,3 +1,4 @@
+// Package main wires mail-service HTTP routes and middleware.
 package main
 
 import (
@@ -23,7 +24,7 @@ func (app *Config) routes() http.Handler {
 
 	mux.Use(middleware.Heartbeat("/ping"))
 
-	mux.Post("/send", app.sendMail)
+	mux.Post("/send", app.handleSendMail)
 
 	return mux
 }

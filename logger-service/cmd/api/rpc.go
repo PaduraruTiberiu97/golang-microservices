@@ -1,3 +1,4 @@
+// Package main exposes logger-service write operations over net/rpc.
 package main
 
 import (
@@ -14,9 +15,10 @@ type RPCPayload struct {
 	Data string `json:"data"`
 }
 
+// LogInfo is called remotely by broker-service to persist a log entry.
 func (r *RPCServer) LogInfo(payload RPCPayload, response *string) error {
-	colelction := client.Database("logs").Collection("logs")
-	_, err := colelction.InsertOne(context.TODO(), data.LogEntry{
+	collection := mongoClient.Database("logs").Collection("logs")
+	_, err := collection.InsertOne(context.TODO(), data.LogEntry{
 		Name:      payload.Name,
 		Data:      payload.Data,
 		CreatedAt: time.Now(),
@@ -28,5 +30,4 @@ func (r *RPCServer) LogInfo(payload RPCPayload, response *string) error {
 
 	*response = "Processed payload via RPC: " + payload.Name
 	return nil
-
 }

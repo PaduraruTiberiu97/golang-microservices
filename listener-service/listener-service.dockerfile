@@ -1,3 +1,4 @@
+# Runtime image for listener-service.
 FROM alpine:latest
 
 RUN mkdir /app

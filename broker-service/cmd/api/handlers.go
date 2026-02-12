@@ -1,3 +1,4 @@
+// Package main implements broker request handlers and service-to-service forwarding logic.
 package main
 
 import (
@@ -40,7 +41,7 @@ type LogPayload struct {
 	Data string `json:"data"`
 }
 
-func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
+func (app *Config) handleBroker(w http.ResponseWriter, r *http.Request) {
 	payload := JsonResponse{
 		Error:   false,
 		Message: "Hit the broker",
@@ -49,12 +50,12 @@ func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
 	_ = app.writeJSON(w, http.StatusOK, payload)
 }
 
-func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
+func (app *Config) handleSubmission(w http.ResponseWriter, r *http.Request) {
 	var requestPayload RequestPayload
 
-	err := app.ReadJSON(w, r, &requestPayload)
+	err := app.decodeJSON(w, r, &requestPayload)
 	if err != nil {
-		err := app.errorJSON(w, err)
+		err := app.writeErrorJSON(w, err)
 		if err != nil {
 			return
 		}
@@ -63,21 +64,21 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 
 	switch requestPayload.Action {
 	case "auth":
-		app.authenticate(w, r, requestPayload.Auth)
+		app.forwardAuthRequest(w, r, requestPayload.Auth)
 	case "log":
-		// app.logEventViaRabbit(w, requestPayload.Log)
-		app.logItemViaRPC(w, requestPayload.Log)
+		// app.logViaRabbitMQ(w, requestPayload.Log)
+		app.logViaRPC(w, requestPayload.Log)
 	case "mail":
-		app.sendMail(w, requestPayload.Mail)
+		app.forwardMailRequest(w, requestPayload.Mail)
 	default:
-		err := app.errorJSON(w, errors.New("invalid action"))
+		err := app.writeErrorJSON(w, errors.New("invalid action"))
 		if err != nil {
 			return
 		}
 	}
 }
 
-func (app *Config) sendMail(w http.ResponseWriter, mail MailPayload) {
+func (app *Config) forwardMailRequest(w http.ResponseWriter, mail MailPayload) {
 	jsonData, _ := json.MarshalIndent(mail, "", "\t")
 
 	// call the mail service
@@ -87,7 +88,7 @@ func (app *Config) sendMail(w http.ResponseWriter, mail MailPayload) {
 
 	request, err := http.NewRequest("POST", mailServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
@@ -97,13 +98,13 @@ func (app *Config) sendMail(w http.ResponseWriter, mail MailPayload) {
 
 	response, err := client.Do(request)
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-		_ = app.errorJSON(w, fmt.Errorf("mail service returned status %d", response.StatusCode))
+		_ = app.writeErrorJSON(w, fmt.Errorf("mail service returned status %d", response.StatusCode))
 		return
 	}
 
@@ -114,14 +115,14 @@ func (app *Config) sendMail(w http.ResponseWriter, mail MailPayload) {
 	_ = app.writeJSON(w, http.StatusOK, payload)
 }
 
-func (app *Config) logItem(w http.ResponseWriter, logPayload LogPayload) {
+func (app *Config) forwardLogRequestHTTP(w http.ResponseWriter, logPayload LogPayload) {
 	jsonData, _ := json.MarshalIndent(logPayload, "", "\t")
 
 	logServiceURL := "http://logger-service/log"
 
 	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
@@ -131,13 +132,13 @@ func (app *Config) logItem(w http.ResponseWriter, logPayload LogPayload) {
 
 	response, err := client.Do(request)
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-		_ = app.errorJSON(w, fmt.Errorf("log service returned status %d", response.StatusCode))
+		_ = app.writeErrorJSON(w, fmt.Errorf("log service returned status %d", response.StatusCode))
 		return
 	}
 
@@ -148,31 +149,31 @@ func (app *Config) logItem(w http.ResponseWriter, logPayload LogPayload) {
 	_ = app.writeJSON(w, http.StatusOK, payload)
 }
 
-func (app *Config) authenticate(w http.ResponseWriter, r *http.Request, authPayload AuthPayload) {
+func (app *Config) forwardAuthRequest(w http.ResponseWriter, r *http.Request, authPayload AuthPayload) {
 	// create some JSON we'll send to the auth microservice
 	jsonData, _ := json.MarshalIndent(authPayload, "", "\t")
 
 	// call the service
 	request, err := http.NewRequest("POST", "http://authentication-service/authenticate", bytes.NewBuffer(jsonData))
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 	defer response.Body.Close()
 
 	// make sure we get back the correct status code
 	if response.StatusCode == http.StatusUnauthorized {
-		_ = app.errorJSON(w, errors.New("invalid credentials"))
+		_ = app.writeErrorJSON(w, errors.New("invalid credentials"))
 		return
 	} else if response.StatusCode != http.StatusAccepted {
-		_ = app.errorJSON(w, errors.New("error calling auth service"))
+		_ = app.writeErrorJSON(w, errors.New("error calling auth service"))
 		return
 	}
 
@@ -182,13 +183,13 @@ func (app *Config) authenticate(w http.ResponseWriter, r *http.Request, authPayl
 	//decode the JSON from the auth service
 	err = json.NewDecoder(response.Body).Decode(&jsonFromService)
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
 	// if we get an error message in jsonFromService.Error == true
 	if jsonFromService.Error {
-		_ = app.errorJSON(w, errors.New(jsonFromService.Message))
+		_ = app.writeErrorJSON(w, errors.New(jsonFromService.Message))
 		return
 	}
 
@@ -201,10 +202,10 @@ func (app *Config) authenticate(w http.ResponseWriter, r *http.Request, authPayl
 	_ = app.writeJSON(w, http.StatusOK, payload)
 }
 
-func (app *Config) logEventViaRabbit(w http.ResponseWriter, logPayload LogPayload) {
-	err := app.pushToQueue(logPayload.Name, logPayload.Data)
+func (app *Config) logViaRabbitMQ(w http.ResponseWriter, logPayload LogPayload) {
+	err := app.publishLogEvent(logPayload.Name, logPayload.Data)
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
@@ -215,8 +216,7 @@ func (app *Config) logEventViaRabbit(w http.ResponseWriter, logPayload LogPayloa
 	_ = app.writeJSON(w, http.StatusOK, payload)
 }
 
-func (app *Config) pushToQueue(name, msg string) error {
-	// emitter, err := event.NewEmitter(app.Rabbit)
+func (app *Config) publishLogEvent(name, msg string) error {
 	emitter, err := event.NewEmitter(app.Rabbit)
 	if err != nil {
 		return err
@@ -228,7 +228,7 @@ func (app *Config) pushToQueue(name, msg string) error {
 	}
 
 	jsonData, _ := json.MarshalIndent(&payload, "", "\t")
-	err = emitter.Push(string(jsonData), "log.INFO")
+	err = emitter.Publish(string(jsonData), "log.INFO")
 	if err != nil {
 		return err
 	}
@@ -240,10 +240,10 @@ type RPCPayload struct {
 	Data string
 }
 
-func (app *Config) logItemViaRPC(w http.ResponseWriter, logPayload LogPayload) {
+func (app *Config) logViaRPC(w http.ResponseWriter, logPayload LogPayload) {
 	client, err := rpc.Dial("tcp", "logger-service:5001")
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
@@ -254,7 +254,7 @@ func (app *Config) logItemViaRPC(w http.ResponseWriter, logPayload LogPayload) {
 	var result string
 	err = client.Call("RPCServer.LogInfo", rpcPayload, &result)
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
@@ -268,9 +268,9 @@ func (app *Config) logItemViaRPC(w http.ResponseWriter, logPayload LogPayload) {
 func (app *Config) logViaGRPC(w http.ResponseWriter, r *http.Request) {
 	var requestPayload RequestPayload
 
-	err := app.ReadJSON(w, r, &requestPayload)
+	err := app.decodeJSON(w, r, &requestPayload)
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
@@ -284,7 +284,7 @@ func (app *Config) logViaGRPC(w http.ResponseWriter, r *http.Request) {
 		grpc.WithBlock(),
 	)
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
@@ -302,7 +302,7 @@ func (app *Config) logViaGRPC(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		_ = app.errorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 

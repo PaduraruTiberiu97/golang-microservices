@@ -1,3 +1,4 @@
+// Package main starts the mail HTTP API and wires SMTP configuration from env vars.
 package main
 
 import (
@@ -11,28 +12,30 @@ type Config struct {
 	Mailer Mail
 }
 
-const webPort = "80"
+const httpPort = "80"
 
 func main() {
 	app := Config{
-		Mailer: createMail(),
+		Mailer: mailerFromEnv(),
 	}
 
-	log.Println("Starting mail service on port ", webPort)
+	log.Println("Starting mail service on port ", httpPort)
 
 	srv := &http.Server{
-		Addr:    ":" + webPort,
+		Addr:    ":" + httpPort,
 		Handler: app.routes(),
 	}
 
-	err := srv.ListenAndServe()
-	if err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Panic(err)
 	}
 }
 
-func createMail() Mail {
-	port, _ := strconv.Atoi(os.Getenv("MAIL_PORT"))
+func mailerFromEnv() Mail {
+	port, err := strconv.Atoi(os.Getenv("MAIL_PORT"))
+	if err != nil {
+		port = 25
+	}
 
 	m := Mail{
 		Domain:      os.Getenv("MAIL_DOMAIN"),

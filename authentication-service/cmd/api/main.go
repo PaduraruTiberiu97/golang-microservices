@@ -1,3 +1,4 @@
+// Package main boots the authentication HTTP service and wires its data dependencies.
 package main
 
 import (
@@ -14,39 +15,37 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
-const webPort = "80"
-
-var counts int64
+const httpPort = "80"
 
 type Config struct {
-	Repo   data.Repository
-	Client *http.Client
+	Repository data.Repository
+	HTTPClient *http.Client
 }
 
 func main() {
 	log.Println("Starting authentication service")
 
-	conn := connectToDB()
+	conn := connectToPostgres()
 	if conn == nil {
 		log.Panic("Can't connect to database")
 	}
 
 	app := Config{
-		Client: &http.Client{},
+		HTTPClient: &http.Client{},
 	}
+	app.setupRepository(conn)
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%s", webPort),
+		Addr:    fmt.Sprintf(":%s", httpPort),
 		Handler: app.routes(),
 	}
 
-	err := server.ListenAndServe()
-	if err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Panic(err)
 	}
 }
 
-func openDB(dsn string) (*sql.DB, error) {
+func openPostgresDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, err
@@ -60,20 +59,21 @@ func openDB(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
-func connectToDB() *sql.DB {
+func connectToPostgres() *sql.DB {
 	dsn := os.Getenv("DSN")
+	var attempts int64
 
 	for {
-		connection, err := openDB(dsn)
+		connection, err := openPostgresDB(dsn)
 		if err != nil {
 			log.Println("Postgres not yet ready...")
-			counts++
+			attempts++
 		} else {
 			log.Println("Connected to Postgres!")
 			return connection
 		}
 
-		if counts > 10 {
+		if attempts > 10 {
 			log.Println("Too many postgres connections...")
 			return nil
 		}
@@ -84,7 +84,6 @@ func connectToDB() *sql.DB {
 	}
 }
 
-func (app *Config) setupRepo(conn *sql.DB) {
-	db := data.NewPostgresRepository(conn)
-	app.Repo = db
+func (app *Config) setupRepository(conn *sql.DB) {
+	app.Repository = data.NewPostgresRepository(conn)
 }

@@ -1,3 +1,4 @@
+// Package data implements MongoDB persistence primitives for logger-service.
 package data
 
 import (
@@ -11,10 +12,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client *mongo.Client
+var mongoClient *mongo.Client
 
-func New(mongo *mongo.Client) Models {
-	client = mongo
+// NewModels wires a MongoDB client into the logger data models.
+func NewModels(client *mongo.Client) Models {
+	mongoClient = client
 
 	return Models{LogEntry: LogEntry{}}
 }
@@ -22,6 +24,7 @@ func New(mongo *mongo.Client) Models {
 type Models struct {
 	LogEntry LogEntry
 }
+
 type LogEntry struct {
 	ID        string    `bson:"_id,omitempty" json:"id,omitempty"`
 	Name      string    `bson:"name" json:"name"`
@@ -30,8 +33,8 @@ type LogEntry struct {
 	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
 }
 
-func (logEntry *LogEntry) Insert(entry LogEntry) error {
-	collection := client.Database("logs").Collection("logs")
+func (entryModel *LogEntry) Insert(entry LogEntry) error {
+	collection := mongoClient.Database("logs").Collection("logs")
 
 	_, err := collection.InsertOne(context.TODO(), LogEntry{
 		Name:      entry.Name,
@@ -45,11 +48,11 @@ func (logEntry *LogEntry) Insert(entry LogEntry) error {
 	return nil
 }
 
-func (logEntry *LogEntry) All() ([]*LogEntry, error) {
+func (entryModel *LogEntry) All() ([]*LogEntry, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	collection := client.Database("logs").Collection("logs")
+	collection := mongoClient.Database("logs").Collection("logs")
 
 	opts := options.Find()
 	opts.SetSort(bson.D{{"created_at", 1}})
@@ -74,19 +77,19 @@ func (logEntry *LogEntry) All() ([]*LogEntry, error) {
 		if err != nil {
 			log.Println("Error decoding item", err)
 			return nil, err
-		} else {
-			logs = append(logs, &item)
 		}
+
+		logs = append(logs, &item)
 	}
 
 	return logs, nil
 }
 
-func (logEntry *LogEntry) GetOne(id string) (*LogEntry, error) {
+func (entryModel *LogEntry) GetOne(id string) (*LogEntry, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	collection := client.Database("logs").Collection("logs")
+	collection := mongoClient.Database("logs").Collection("logs")
 
 	docID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -102,11 +105,11 @@ func (logEntry *LogEntry) GetOne(id string) (*LogEntry, error) {
 	return &entry, nil
 }
 
-func (logEntry *LogEntry) DropCollection() error {
+func (entryModel *LogEntry) DropCollection() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	collection := client.Database("logs").Collection("logs")
+	collection := mongoClient.Database("logs").Collection("logs")
 
 	if err := collection.Drop(ctx); err != nil {
 		return err
@@ -115,13 +118,13 @@ func (logEntry *LogEntry) DropCollection() error {
 	return nil
 }
 
-func (logEntry *LogEntry) Update() (*mongo.UpdateResult, error) {
+func (entryModel *LogEntry) Update() (*mongo.UpdateResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	collection := client.Database("logs").Collection("logs")
+	collection := mongoClient.Database("logs").Collection("logs")
 
-	docID, err := primitive.ObjectIDFromHex(logEntry.ID)
+	docID, err := primitive.ObjectIDFromHex(entryModel.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +134,8 @@ func (logEntry *LogEntry) Update() (*mongo.UpdateResult, error) {
 		bson.M{"_id": docID},
 		bson.D{
 			{"$set", bson.D{
-				{"name", logEntry.Name},
-				{"data", logEntry.Data},
+				{"name", entryModel.Name},
+				{"data", entryModel.Data},
 				{"updated_at", time.Now()},
 			}},
 		},

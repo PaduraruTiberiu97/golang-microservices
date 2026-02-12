@@ -1,3 +1,4 @@
+# Standalone PostgreSQL service definition for local development.
 services:
   postgres:
     image: "postgres:14.2"

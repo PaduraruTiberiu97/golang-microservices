@@ -1,3 +1,4 @@
+# Runtime image for authentication-service.
 FROM alpine:latest
 
 RUN mkdir /app

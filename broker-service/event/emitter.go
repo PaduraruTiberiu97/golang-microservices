@@ -1,3 +1,4 @@
+// Package event contains RabbitMQ publisher primitives used by the broker.
 package event
 
 import (
@@ -10,17 +11,17 @@ type Emitter struct {
 	connection *amqp.Connection
 }
 
-func (e *Emitter) setup() error {
+func (e *Emitter) ensureExchange() error {
 	channel, err := e.connection.Channel()
 	if err != nil {
 		return err
 	}
 	defer channel.Close()
 
-	return declareExchange(channel)
+	return declareLogsExchange(channel)
 }
 
-func (e *Emitter) Push(event string, severity string) error {
+func (e *Emitter) Publish(event string, severity string) error {
 	channel, err := e.connection.Channel()
 	if err != nil {
 		return err
@@ -47,7 +48,7 @@ func (e *Emitter) Push(event string, severity string) error {
 
 func NewEmitter(conn *amqp.Connection) (Emitter, error) {
 	emitter := Emitter{connection: conn}
-	err := emitter.setup()
+	err := emitter.ensureExchange()
 	if err != nil {
 		return Emitter{}, err
 	}

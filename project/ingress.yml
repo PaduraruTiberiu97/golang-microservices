@@ -1,3 +1,4 @@
+# Kubernetes ingress routing for front-end and broker services.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

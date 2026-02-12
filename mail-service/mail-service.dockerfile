@@ -1,3 +1,4 @@
+# Runtime image for mail-service.
 FROM alpine:latest
 
 RUN mkdir /app

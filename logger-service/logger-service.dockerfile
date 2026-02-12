@@ -1,3 +1,4 @@
+# Runtime image for logger-service.
 FROM alpine:latest
 
 RUN mkdir /app

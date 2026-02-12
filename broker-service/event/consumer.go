@@ -1,3 +1,4 @@
+// Package event implements RabbitMQ consumption and forwarding to logger-service.
 package event
 
 import (
@@ -11,31 +12,28 @@ import (
 )
 
 type Consumer struct {
-	conn      *amqp.Connection
-	queueName string
+	conn *amqp.Connection
 }
 
 func NewConsumer(conn *amqp.Connection) (Consumer, error) {
-	consumer := Consumer{
-		conn:      conn,
-		queueName: "events",
-	}
+	consumer := Consumer{conn: conn}
 
-	err := consumer.setup()
+	err := consumer.ensureExchange()
 	if err != nil {
-		return Consumer{}, nil
+		return Consumer{}, err
 	}
 
 	return consumer, nil
 }
 
-func (consumer *Consumer) setup() error {
+func (consumer *Consumer) ensureExchange() error {
 	channel, err := consumer.conn.Channel()
 	if err != nil {
 		return err
 	}
+	defer channel.Close()
 
-	return declareExchange(channel)
+	return declareLogsExchange(channel)
 }
 
 type Payload struct {
@@ -50,7 +48,7 @@ func (consumer *Consumer) Listen(topics []string) error {
 	}
 	defer ch.Close()
 
-	queue, err := declareQueue(ch)
+	queue, err := declareEphemeralQueue(ch)
 	if err != nil {
 		return err
 	}
@@ -87,7 +85,7 @@ func (consumer *Consumer) Listen(topics []string) error {
 			var payload Payload
 			_ = json.Unmarshal(d.Body, &payload)
 
-			go handlePayload(payload)
+			go dispatchPayload(payload)
 		}
 	}()
 
@@ -97,24 +95,24 @@ func (consumer *Consumer) Listen(topics []string) error {
 	return nil
 }
 
-func handlePayload(payload Payload) {
+func dispatchPayload(payload Payload) {
 	switch payload.Name {
 	case "log", "event":
-		err := logEvent(payload)
+		err := forwardLogEvent(payload)
 		if err != nil {
 			log.Printf("Error handling payload: %s", err)
 		}
 	case "auth":
 		//
 	default:
-		err := logEvent(payload)
+		err := forwardLogEvent(payload)
 		if err != nil {
 			log.Printf("Error handling payload: %s", err)
 		}
 	}
 }
 
-func logEvent(entry Payload) error {
+func forwardLogEvent(entry Payload) error {
 	jsonData, _ := json.MarshalIndent(entry, "", "\t")
 
 	logServiceURL := "http://logger-service/log"
@@ -135,7 +133,7 @@ func logEvent(entry Payload) error {
 	defer response.Body.Close()
 
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-		return err
+		return fmt.Errorf("logger service returned status %d", response.StatusCode)
 	}
 
 	return nil

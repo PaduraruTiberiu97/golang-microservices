@@ -1,3 +1,4 @@
+// Package main contains SMTP delivery and template rendering utilities.
 package main
 
 import (
@@ -25,12 +26,12 @@ type Message struct {
 	FromName    string // name associated with the email address
 	To          string // email address
 	Subject     string
-	Attachemnts []string
+	Attachments []string
 	Data        any
 	DataMap     map[string]any
 }
 
-func (m *Mail) SendSmtpMessage(msg Message) error {
+func (m *Mail) SendSMTPMessage(msg Message) error {
 	if msg.From == "" {
 		msg.From = m.FromAddress
 	}
@@ -45,12 +46,12 @@ func (m *Mail) SendSmtpMessage(msg Message) error {
 
 	msg.DataMap = data
 
-	formattedMessage, err := m.buildHtmlMessage(msg)
+	formattedMessage, err := m.buildHTMLMessage(msg)
 	if err != nil {
 		return err
 	}
 
-	plainMessage, err := m.buildPlainTextMessage(msg)
+	plainMessage, err := m.buildPlainTextBody(msg)
 	if err != nil {
 		return err
 	}
@@ -60,7 +61,7 @@ func (m *Mail) SendSmtpMessage(msg Message) error {
 	srv.Port = m.Port
 	srv.Username = m.Username
 	srv.Password = m.Password
-	srv.Encryption = m.getEncryption(m.Encryption)
+	srv.Encryption = m.resolveEncryption(m.Encryption)
 	srv.KeepAlive = false
 	srv.ConnectTimeout = 10 * time.Second
 	srv.SendTimeout = 10 * time.Second
@@ -78,8 +79,8 @@ func (m *Mail) SendSmtpMessage(msg Message) error {
 	email.SetBody(mail.TextPlain, plainMessage)
 	email.AddAlternative(mail.TextHTML, formattedMessage)
 
-	if len(msg.Attachemnts) > 0 {
-		for _, item := range msg.Attachemnts {
+	if len(msg.Attachments) > 0 {
+		for _, item := range msg.Attachments {
 			email.AddAttachment(item)
 		}
 	}
@@ -92,7 +93,7 @@ func (m *Mail) SendSmtpMessage(msg Message) error {
 	return nil
 }
 
-func (m *Mail) buildHtmlMessage(msg Message) (string, error) {
+func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 	templateToRender := "./templates/mail.html.gohtml"
 
 	t, err := template.New("email-html").ParseFiles(templateToRender)
@@ -106,7 +107,7 @@ func (m *Mail) buildHtmlMessage(msg Message) (string, error) {
 	}
 
 	formattedMessage := tpl.String()
-	formattedMessage, err = m.inlineCSS(formattedMessage)
+	formattedMessage, err = m.inlineEmailCSS(formattedMessage)
 	if err != nil {
 		return "", err
 	}
@@ -114,7 +115,7 @@ func (m *Mail) buildHtmlMessage(msg Message) (string, error) {
 	return formattedMessage, nil
 }
 
-func (m *Mail) buildPlainTextMessage(msg Message) (string, error) {
+func (m *Mail) buildPlainTextBody(msg Message) (string, error) {
 	templateToRender := "./templates/mail.plain.gohtml"
 
 	t, err := template.New("email-plain").ParseFiles(templateToRender)
@@ -132,7 +133,7 @@ func (m *Mail) buildPlainTextMessage(msg Message) (string, error) {
 	return plainMessage, nil
 }
 
-func (m *Mail) inlineCSS(s string) (string, error) {
+func (m *Mail) inlineEmailCSS(s string) (string, error) {
 	options := premailer.Options{
 		RemoveClasses:     false,
 		CssToAttributes:   false,
@@ -152,7 +153,7 @@ func (m *Mail) inlineCSS(s string) (string, error) {
 	return html, nil
 }
 
-func (m *Mail) getEncryption(encryption string) mail.Encryption {
+func (m *Mail) resolveEncryption(encryption string) mail.Encryption {
 	switch encryption {
 	case "tls":
 		return mail.EncryptionSTARTTLS

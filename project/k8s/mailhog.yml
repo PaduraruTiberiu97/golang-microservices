@@ -1,3 +1,4 @@
+# Kubernetes deployment and service for MailHog/Mailpit SMTP test UI.
 
 apiVersion: apps/v1
 kind: Deployment

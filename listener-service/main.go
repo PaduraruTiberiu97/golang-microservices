@@ -1,3 +1,4 @@
+// Package main starts a RabbitMQ consumer that forwards events to logger-service.
 package main
 
 import (
@@ -12,8 +13,8 @@ import (
 )
 
 func main() {
-	// try to connect to rabbitmq
-	rabbitmqConn, err := connect()
+	// try to connect to RabbitMQ
+	rabbitmqConn, err := connectToRabbitMQ()
 	if err != nil {
 		log.Fatal("Could not connect to RabbitMQ. Exiting...", err)
 		os.Exit(1)
@@ -35,30 +36,30 @@ func main() {
 	}
 }
 
-func connect() (*amqp.Connection, error) {
-	var counts int64
-	var backOff = 1 * time.Second
+func connectToRabbitMQ() (*amqp.Connection, error) {
+	var attempts int64
+	backoff := 1 * time.Second
 	var connection *amqp.Connection
 
 	for {
 		conn, err := amqp.Dial("amqp://guest:guest@rabbitmq")
 		if err != nil {
 			fmt.Println("RabbitMq not yet ready...")
-			counts++
+			attempts++
 		} else {
 			log.Println("Connected to RabbitMQ")
 			connection = conn
 			break
 		}
 
-		if counts > 5 {
+		if attempts > 5 {
 			fmt.Println("Too many attempts to connect to RabbitMQ. Exiting...", err)
 			return nil, err
 		}
 
-		backOff = time.Duration(math.Pow(float64(counts), 2)) * time.Second
-		log.Println("Backing off for", backOff)
-		time.Sleep(backOff)
+		backoff = time.Duration(math.Pow(float64(attempts), 2)) * time.Second
+		log.Println("Backing off for", backoff)
+		time.Sleep(backoff)
 
 		continue
 	}

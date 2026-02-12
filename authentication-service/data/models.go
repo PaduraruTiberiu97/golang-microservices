@@ -1,3 +1,4 @@
+// Package data implements PostgreSQL-backed persistence for authentication users.
 package data
 
 import (
@@ -12,34 +13,17 @@ import (
 
 const dbTimeout = time.Second * 3
 
-var db *sql.DB
+var postgresDB *sql.DB
 
 type PostgresRepository struct {
 	Conn *sql.DB
 }
 
 func NewPostgresRepository(pool *sql.DB) *PostgresRepository {
-	db = pool
+	postgresDB = pool
 	return &PostgresRepository{
 		Conn: pool,
 	}
-}
-
-// New is the function used to create an instance of the data package. It returns the type
-// Model, which embeds all the types we want to be available to our application.
-//func New(dbPool *sql.DB) Models {
-//	db = dbPool
-//
-//	return Models{
-//		Users: User{},
-//	}
-//}
-
-// Models is the type for this package. Note that any model that is included as a member
-// in this type is available to us throughout the application, anywhere that the
-// app variable is used, provided that the model is also added in the New function.
-type Models struct {
-	Users User
 }
 
 // User is the structure which holds one user from the database.
@@ -55,14 +39,14 @@ type User struct {
 }
 
 // GetAll returns a slice of all users, sorted by last name
-func (u *PostgresRepository) GetAll() ([]*User, error) {
+func (repo *PostgresRepository) GetAll() ([]*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at
 	from users order by last_name`
 
-	rows, err := db.QueryContext(ctx, query)
+	rows, err := postgresDB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -94,14 +78,14 @@ func (u *PostgresRepository) GetAll() ([]*User, error) {
 }
 
 // GetByEmail returns one user by email
-func (u *PostgresRepository) GetByEmail(email string) (*User, error) {
+func (repo *PostgresRepository) GetByEmail(email string) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at from users where email = $1`
 
 	var user User
-	row := db.QueryRowContext(ctx, query, email)
+	row := postgresDB.QueryRowContext(ctx, query, email)
 
 	err := row.Scan(
 		&user.ID,
@@ -122,14 +106,14 @@ func (u *PostgresRepository) GetByEmail(email string) (*User, error) {
 }
 
 // GetOne returns one user by id
-func (u *PostgresRepository) GetOne(id int) (*User, error) {
+func (repo *PostgresRepository) GetOne(id int) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at from users where id = $1`
 
 	var user User
-	row := db.QueryRowContext(ctx, query, id)
+	row := postgresDB.QueryRowContext(ctx, query, id)
 
 	err := row.Scan(
 		&user.ID,
@@ -151,7 +135,7 @@ func (u *PostgresRepository) GetOne(id int) (*User, error) {
 
 // Update updates one user in the database, using the information
 // stored in the receiver u
-func (u *PostgresRepository) Update(user User) error {
+func (repo *PostgresRepository) Update(user User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -164,7 +148,7 @@ func (u *PostgresRepository) Update(user User) error {
 		where id = $6
 	`
 
-	_, err := db.ExecContext(ctx, stmt,
+	_, err := postgresDB.ExecContext(ctx, stmt,
 		user.Email,
 		user.FirstName,
 		user.LastName,
@@ -181,13 +165,13 @@ func (u *PostgresRepository) Update(user User) error {
 }
 
 // DeleteByID deletes one user from the database, by ID
-func (u *PostgresRepository) DeleteByID(id int) error {
+func (repo *PostgresRepository) DeleteByID(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	stmt := `delete from users where id = $1`
 
-	_, err := db.ExecContext(ctx, stmt, id)
+	_, err := postgresDB.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
 	}
@@ -196,7 +180,7 @@ func (u *PostgresRepository) DeleteByID(id int) error {
 }
 
 // Insert inserts a new user into the database, and returns the ID of the newly inserted row
-func (u *PostgresRepository) Insert(user User) (int, error) {
+func (repo *PostgresRepository) Insert(user User) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -208,7 +192,7 @@ func (u *PostgresRepository) Insert(user User) (int, error) {
 	stmt := `insert into users (email, first_name, last_name, password, user_active, created_at, updated_at)
 		values ($1, $2, $3, $4, $5, $6, $7) returning id`
 
-	err = db.QueryRowContext(ctx, stmt,
+	err = postgresDB.QueryRowContext(ctx, stmt,
 		user.Email,
 		user.FirstName,
 		user.LastName,
@@ -226,7 +210,7 @@ func (u *PostgresRepository) Insert(user User) (int, error) {
 }
 
 // ResetPassword is the method we will use to change a user's password.
-func (u *PostgresRepository) ResetPassword(password string, user User) error {
+func (repo *PostgresRepository) ResetPassword(password string, user User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -236,7 +220,7 @@ func (u *PostgresRepository) ResetPassword(password string, user User) error {
 	}
 
 	stmt := `update users set password = $1 where id = $2`
-	_, err = db.ExecContext(ctx, stmt, hashedPassword, user.ID)
+	_, err = postgresDB.ExecContext(ctx, stmt, hashedPassword, user.ID)
 	if err != nil {
 		return err
 	}
@@ -247,7 +231,7 @@ func (u *PostgresRepository) ResetPassword(password string, user User) error {
 // PasswordMatches uses Go's bcrypt package to compare a user supplied password
 // with the hash we have stored for a given user in the database. If the password
 // and hash match, we return true; otherwise, we return false.
-func (u *PostgresRepository) PasswordMatches(plainText string, user User) (bool, error) {
+func (repo *PostgresRepository) PasswordMatches(plainText string, user User) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(plainText))
 	if err != nil {
 		switch {

@@ -121,6 +121,5 @@ cd authentication-service && go test ./...
 
 ## Notes / Caveats In Current Code
 
-- `authentication-service/cmd/api/main.go` connects to Postgres but does not call `setupRepo`, so `app.Repo` is not initialized in `main`.
 - Broker mail routing uses `http://mailer-service/send`; in Docker Compose the service name is `mail-service` (Kubernetes manifest uses `mailer-service`).
 - Repository currently contains built binaries (`authApp`, `brokerApp`, etc.) and runtime DB volume data under `project/db-data/`.

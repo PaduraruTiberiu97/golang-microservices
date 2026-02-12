@@ -1,3 +1,4 @@
+// Package main defines HTTP handlers for authentication operations.
 package main
 
 import (
@@ -8,15 +9,15 @@ import (
 	"net/http"
 )
 
-func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
+func (app *Config) handleAuthenticate(w http.ResponseWriter, r *http.Request) {
 	var requestPayload struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 
-	err := app.readJSON(w, r, &requestPayload)
+	err := app.decodeJSON(w, r, &requestPayload)
 	if err != nil {
-		err := app.errorJSON(w, err, http.StatusBadRequest)
+		err := app.writeErrorJSON(w, err, http.StatusBadRequest)
 		if err != nil {
 			return
 		}
@@ -24,9 +25,9 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate the user
-	user, err := app.Repo.GetByEmail(requestPayload.Email)
+	user, err := app.Repository.GetByEmail(requestPayload.Email)
 	if err != nil {
-		err := app.errorJSON(w, errors.New("invalid credentials"), http.StatusUnauthorized)
+		err := app.writeErrorJSON(w, errors.New("invalid credentials"), http.StatusUnauthorized)
 		if err != nil {
 			return
 		}
@@ -34,9 +35,9 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate password
-	valid, err := app.Repo.PasswordMatches(requestPayload.Password, *user)
+	valid, err := app.Repository.PasswordMatches(requestPayload.Password, *user)
 	if err != nil || !valid {
-		err := app.errorJSON(w, errors.New("invalid credentials"), http.StatusUnauthorized)
+		err := app.writeErrorJSON(w, errors.New("invalid credentials"), http.StatusUnauthorized)
 		if err != nil {
 			return
 		}
@@ -44,9 +45,9 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// log auth
-	err = app.logRequest("authentication", fmt.Sprintf("%s logged in", user.Email))
+	err = app.logAuthenticationEvent("authentication", fmt.Sprintf("%s logged in", user.Email))
 	if err != nil {
-		app.errorJSON(w, err)
+		app.writeErrorJSON(w, err)
 		return
 	}
 
@@ -56,13 +57,12 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 		Data:    user,
 	}
 
-	err = app.writeJSON(w, http.StatusAccepted, payload)
-	if err != nil {
+	if err = app.writeJSON(w, http.StatusAccepted, payload); err != nil {
 		return
 	}
 }
 
-func (app *Config) logRequest(name, data string) error {
+func (app *Config) logAuthenticationEvent(name, data string) error {
 	var entry struct {
 		Name string `json:"name"`
 		Data string `json:"data"`
@@ -79,11 +79,10 @@ func (app *Config) logRequest(name, data string) error {
 		return err
 	}
 
-	_, err = app.Client.Do(request)
+	_, err = app.HTTPClient.Do(request)
 	if err != nil {
 		return err
 	}
 
 	return nil
-
 }

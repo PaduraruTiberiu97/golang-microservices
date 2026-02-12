@@ -1,3 +1,4 @@
+# Kubernetes deployment and service for logger-service (HTTP/RPC/gRPC).
 apiVersion: apps/v1
 kind: Deployment
 metadata:

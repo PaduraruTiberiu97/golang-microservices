@@ -1,3 +1,4 @@
+// Package main exposes logger-service write operations over gRPC.
 package main
 
 import (
@@ -15,6 +16,7 @@ type LogServer struct {
 	Models data.Models
 }
 
+// Write persists a log entry received from gRPC clients.
 func (l *LogServer) Write(ctx context.Context, req *logs.LogRequest) (*logs.LogResponse, error) {
 	input := req.GetLogEntry()
 
@@ -34,8 +36,9 @@ func (l *LogServer) Write(ctx context.Context, req *logs.LogRequest) (*logs.LogR
 	res := &logs.LogResponse{Result: "success"}
 	return res, nil
 }
-func (app *Config) gRPCListen() {
-	lis, err := net.Listen("tcp", ":"+gRpcPort)
+
+func (app *Config) listenGRPC() {
+	lis, err := net.Listen("tcp", ":"+grpcPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -44,9 +47,8 @@ func (app *Config) gRPCListen() {
 
 	logs.RegisterLogServiceServer(grpcServer, &LogServer{Models: app.Models})
 
-	log.Printf("gRPC server started on port %s", gRpcPort)
+	log.Printf("gRPC server started on port %s", grpcPort)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-
 }

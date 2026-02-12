@@ -1,3 +1,4 @@
+# Local Docker Compose topology for all services and dependencies.
 services:
   broker-service:
     build:

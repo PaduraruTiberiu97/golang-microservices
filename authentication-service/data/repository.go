@@ -1,5 +1,7 @@
+// Package data defines contracts used by the authentication service data layer.
 package data
 
+// Repository describes the persistence operations used by authentication handlers.
 type Repository interface {
 	GetAll() ([]*User, error)
 	GetByEmail(email string) (*User, error)
