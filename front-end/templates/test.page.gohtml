@@ -44,6 +44,7 @@
         let received = document.getElementById('received')
         let mailBtn = document.getElementById('mailBtn')
         let logGrpc = document.getElementById('logGrpc')
+        let brokerURL = "{{.BrokerURL}}".replace(/\/+$/, "")
 
         mailBtn.addEventListener('click', function () {
             const payload = {
@@ -65,7 +66,7 @@
                 headers: headers
             }
 
-            fetch("http://localhost:8000/handle", body)
+            fetch(`${brokerURL}/handle`, body)
                 .then((res) => res.json())
                 .then((data) => {
                     sent.innerHTML = JSON.stringify(payload, undefined, 4)
@@ -100,7 +101,7 @@
                 headers: headers
             }
 
-            fetch("http://localhost:8000/handle", body)
+            fetch(`${brokerURL}/handle`, body)
                 .then((res) => res.json())
                 .then((data) => {
                     sent.innerHTML = 'Empty post request'
@@ -121,7 +122,7 @@
             const body = {
                 method: "POST"
             }
-            fetch("http://localhost:8000", body)
+            fetch(brokerURL, body)
                 .then((res) => res.json())
                 .then((data) => {
                     sent.innerHTML = 'Empty post request'
@@ -156,7 +157,7 @@
                 headers: headers
             }
 
-            fetch("http://localhost:8000/handle", body)
+            fetch(`${brokerURL}/handle`, body)
                 .then((res) => res.json())
                 .then((data) => {
                     sent.innerHTML = JSON.stringify(payload, undefined, 4)
@@ -191,7 +192,7 @@
                 headers: headers
             }
 
-            fetch("http://localhost:8000/log-grpc", body)
+            fetch(`${brokerURL}/log-grpc`, body)
                 .then((res) => res.json())
                 .then((data) => {
                     sent.innerHTML = JSON.stringify(payload, undefined, 4)

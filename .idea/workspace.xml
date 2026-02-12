@@ -5,23 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0d80dc1-35b7-4b6f-8b4a-93fe390e4b77" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/authentication-service/authApp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/front-end/frontApp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listener-service/listenerApp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logger-service/cmd/api/grpc.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logger-service/cmd/api/rpc.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/logger-service/loggerServiceApp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mail-service/mailerApp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/ingress.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/k8s/authentication.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/k8s/broker.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/k8s/front-end.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/k8s/listener.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/k8s/logger.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/k8s/mail.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/k8s/mailhog.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/k8s/mongo.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/k8s/rabbit.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/postgres.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/broker-service/brokerApp" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/brokerApp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/routes.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/broker-service/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/broker-service/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/go.sum" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +33,7 @@
     </persistenceIdMap>
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="1567" />
+    <option name="cachedIndexableFilesCount" value="1730" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -59,8 +58,20 @@
     &quot;accountId&quot;: &quot;6defbf42-8ace-477f-ad76-2860620267b3&quot;
   }
 }</component>
+  <component name="JsbtTreeLayoutManager">
+    <layout place="tools.popupGrunt">
+      <scroll-view-position x="0" y="0" />
+    </layout>
+  </component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
+  &quot;configuredContexts&quot;: [
+    {
+      &quot;name&quot;: &quot;minikube&quot;,
+      &quot;kubeConfigUrl&quot;: &quot;file:///Users/tiberiu/.kube/config&quot;,
+      &quot;originalNamespace&quot;: &quot;default&quot;
+    }
+  ],
   &quot;isMigrated&quot;: true
 }</component>
   <component name="McpProjectServerCommands">
@@ -78,47 +89,49 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;Makefile Target.build_front.executor&quot;: &quot;Run&quot;,
-    &quot;Makefile Target.start.executor&quot;: &quot;Run&quot;,
-    &quot;Makefile Target.up.executor&quot;: &quot;Run&quot;,
-    &quot;Makefile Target.up_build.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginOnboardingV2&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/tiberiu/Work/golang-projects/golang-microservices&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "Makefile Target.build_front.executor": "Run",
+    "Makefile Target.start.executor": "Run",
+    "Makefile Target.up.executor": "Run",
+    "Makefile Target.up_build.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.GoLinterPluginOnboardingV2": "true",
+    "RunOnceActivity.GoLinterPluginStorageMigration": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "go.sdk.automatically.set": "true",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/Users/tiberiu/Work/golang-projects/golang-microservices/project",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/project" />
+      <recent name="$PROJECT_DIR$/project/k8s" />
       <recent name="$PROJECT_DIR$/logger-service/cmd" />
       <recent name="$PROJECT_DIR$/logger-service/cmd/api" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/project" />
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/logger-service" />
       <recent name="F:\Golang\Microservices\authentication-service" />
       <recent name="F:\Golang\Microservices" />
-      <recent name="F:\Golang\Microservices\project" />
-      <recent name="F:\Golang\Microservices\broker-service" />
     </key>
   </component>
   <component name="RunManager" selected="Makefile Target.start">
