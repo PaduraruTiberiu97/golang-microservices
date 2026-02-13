@@ -23,7 +23,7 @@ func newTestHTTPClient(fn roundTripFunc) *http.Client {
 }
 
 func TestHandleAuthenticate(t *testing.T) {
-	loggerResponseBody := `{"error": false, "message": "some message"`
+	loggerResponseBody := `{"error": false, "message": "some message"}`
 
 	client := newTestHTTPClient(func(req *http.Request) *http.Response {
 		return &http.Response{
@@ -42,7 +42,7 @@ func TestHandleAuthenticate(t *testing.T) {
 
 	body, _ := json.Marshal(postBody)
 
-	req, _ := http.NewRequest("POST", "/api/authenticate", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/authenticate", bytes.NewBuffer(body))
 	rr := httptest.NewRecorder()
 
 	handler := http.HandlerFunc(testApp.handleAuthenticate)

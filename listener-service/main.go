@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"listener/event"
 	"log"
 	"math"
@@ -26,7 +25,7 @@ func main() {
 	// create consumer
 	consumer, err := event.NewConsumer(rabbitmqConn)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// watch the queue and consume events
@@ -44,7 +43,7 @@ func connectToRabbitMQ() (*amqp.Connection, error) {
 	for {
 		conn, err := amqp.Dial("amqp://guest:guest@rabbitmq")
 		if err != nil {
-			fmt.Println("RabbitMq not yet ready...")
+			log.Println("RabbitMQ not yet ready...")
 			attempts++
 		} else {
 			log.Println("Connected to RabbitMQ")
@@ -53,7 +52,7 @@ func connectToRabbitMQ() (*amqp.Connection, error) {
 		}
 
 		if attempts > 5 {
-			fmt.Println("Too many attempts to connect to RabbitMQ. Exiting...", err)
+			log.Println("Too many attempts to connect to RabbitMQ. Exiting...", err)
 			return nil, err
 		}
 

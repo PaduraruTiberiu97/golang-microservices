@@ -7,9 +7,15 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func (app *Config) handleAuthenticate(w http.ResponseWriter, r *http.Request) {
+	if app.Repository == nil {
+		_ = app.writeErrorJSON(w, errors.New("repository is not configured"))
+		return
+	}
+
 	var requestPayload struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -71,17 +77,30 @@ func (app *Config) logAuthenticationEvent(name, data string) error {
 	entry.Name = name
 	entry.Data = data
 
-	jsonData, _ := json.MarshalIndent(entry, "", "\t")
+	jsonData, err := json.Marshal(entry)
+	if err != nil {
+		return err
+	}
 	logServiceURL := "http://logger-service/log"
 
 	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}
+	request.Header.Set("Content-Type", "application/json")
 
-	_, err = app.HTTPClient.Do(request)
+	client := app.HTTPClient
+	if client == nil {
+		client = &http.Client{Timeout: 5 * time.Second}
+	}
+
+	response, err := client.Do(request)
 	if err != nil {
 		return err
+	}
+	defer response.Body.Close()
+	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
+		return fmt.Errorf("logger service returned status %d", response.StatusCode)
 	}
 
 	return nil

@@ -1,10 +1,14 @@
 # Runtime image for mail-service.
-FROM alpine:latest
+FROM golang:1.25-alpine AS builder
 
-RUN mkdir /app
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/mailerApp ./cmd/api
 
-COPY mailerApp /app
-COPY templates /app/templates
-
+FROM alpine:3.21
 WORKDIR /app
-CMD ["/app/mailerApp"]
+COPY --from=builder /app/mailerApp /app/mailerApp
+COPY --from=builder /src/templates /app/templates
+ENTRYPOINT ["/app/mailerApp"]

@@ -14,6 +14,8 @@ import (
 
 var mongoClient *mongo.Client
 
+const dbTimeout = 15 * time.Second
+
 // NewModels wires a MongoDB client into the logger data models.
 func NewModels(client *mongo.Client) Models {
 	mongoClient = client
@@ -34,9 +36,12 @@ type LogEntry struct {
 }
 
 func (entryModel *LogEntry) Insert(entry LogEntry) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
 	collection := mongoClient.Database("logs").Collection("logs")
 
-	_, err := collection.InsertOne(context.TODO(), LogEntry{
+	_, err := collection.InsertOne(ctx, LogEntry{
 		Name:      entry.Name,
 		Data:      entry.Data,
 		CreatedAt: time.Now(),
@@ -49,25 +54,24 @@ func (entryModel *LogEntry) Insert(entry LogEntry) error {
 }
 
 func (entryModel *LogEntry) All() ([]*LogEntry, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	collection := mongoClient.Database("logs").Collection("logs")
 
 	opts := options.Find()
-	opts.SetSort(bson.D{{"created_at", 1}})
+	opts.SetSort(bson.D{{Key: "created_at", Value: 1}})
 
-	cursor, err := collection.Find(context.TODO(), bson.D{{}}, opts)
+	cursor, err := collection.Find(ctx, bson.D{}, opts)
 	if err != nil {
 		log.Println("Error finding logEntry", err)
 		return nil, err
 	}
-	defer func(cursor *mongo.Cursor, ctx context.Context) {
-		err := cursor.Close(ctx)
-		if err != nil {
-			log.Println("Error closing cursor", err)
+	defer func() {
+		if closeErr := cursor.Close(ctx); closeErr != nil {
+			log.Println("Error closing cursor", closeErr)
 		}
-	}(cursor, ctx)
+	}()
 
 	var logs []*LogEntry
 
@@ -86,7 +90,7 @@ func (entryModel *LogEntry) All() ([]*LogEntry, error) {
 }
 
 func (entryModel *LogEntry) GetOne(id string) (*LogEntry, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	collection := mongoClient.Database("logs").Collection("logs")
@@ -97,7 +101,7 @@ func (entryModel *LogEntry) GetOne(id string) (*LogEntry, error) {
 	}
 
 	var entry LogEntry
-	err = collection.FindOne(ctx, bson.D{{"_id", docID}}).Decode(&entry)
+	err = collection.FindOne(ctx, bson.D{{Key: "_id", Value: docID}}).Decode(&entry)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +110,7 @@ func (entryModel *LogEntry) GetOne(id string) (*LogEntry, error) {
 }
 
 func (entryModel *LogEntry) DropCollection() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	collection := mongoClient.Database("logs").Collection("logs")
@@ -119,7 +123,7 @@ func (entryModel *LogEntry) DropCollection() error {
 }
 
 func (entryModel *LogEntry) Update() (*mongo.UpdateResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	collection := mongoClient.Database("logs").Collection("logs")
@@ -133,10 +137,10 @@ func (entryModel *LogEntry) Update() (*mongo.UpdateResult, error) {
 		ctx,
 		bson.M{"_id": docID},
 		bson.D{
-			{"$set", bson.D{
-				{"name", entryModel.Name},
-				{"data", entryModel.Data},
-				{"updated_at", time.Now()},
+			{Key: "$set", Value: bson.D{
+				{Key: "name", Value: entryModel.Name},
+				{Key: "data", Value: entryModel.Data},
+				{Key: "updated_at", Value: time.Now()},
 			}},
 		},
 	)

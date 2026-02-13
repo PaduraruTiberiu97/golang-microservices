@@ -7,6 +7,12 @@ services:
     restart: always
     ports:
       - "8000:80"
+    environment:
+      AUTH_SERVICE_URL: "http://authentication-service/authenticate"
+      LOGGER_SERVICE_URL: "http://logger-service/log"
+      LOGGER_RPC_ADDR: "logger-service:5001"
+      LOGGER_GRPC_ADDR: "logger-service:50001"
+      MAIL_SERVICE_URL: "http://mail-service/send"
     deploy:
       mode: replicated
       replicas: 1
@@ -86,7 +92,7 @@ services:
       - ./db-data/mongo/:/data/db
 
   mailhog:
-    image: "mailhog/mailhog:latest"
+    image: "axllent/mailpit:latest"
     ports:
       - "1025:1025"
       - "8025:8025"

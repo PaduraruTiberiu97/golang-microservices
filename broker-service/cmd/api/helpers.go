@@ -56,7 +56,7 @@ func (app *Config) writeJSON(w http.ResponseWriter, status int, data any, header
 }
 
 func (app *Config) writeErrorJSON(w http.ResponseWriter, err error, status ...int) error {
-	statusCode := 200
+	statusCode := http.StatusInternalServerError
 
 	if len(status) > 0 {
 		statusCode = status[0]

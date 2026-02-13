@@ -50,7 +50,7 @@ func main() {
 	app := Config{Models: data.NewModels(mongoClient)}
 
 	// Register the RPC server.
-	if err = rpc.Register(new(RPCServer)); err != nil {
+	if err = rpc.Register(&RPCServer{Models: app.Models}); err != nil {
 		log.Panic(err)
 	}
 
@@ -95,9 +95,16 @@ func connectMongo() (*mongo.Client, error) {
 		Password: "password",
 	})
 
-	connection, err := mongo.Connect(context.TODO(), clientOptions)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	connection, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Println("Error connecting to MongoDB", err)
+		return nil, err
+	}
+
+	if err = connection.Ping(ctx, nil); err != nil {
 		return nil, err
 	}
 

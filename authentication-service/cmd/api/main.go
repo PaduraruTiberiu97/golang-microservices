@@ -31,7 +31,9 @@ func main() {
 	}
 
 	app := Config{
-		HTTPClient: &http.Client{},
+		HTTPClient: &http.Client{
+			Timeout: 5 * time.Second,
+		},
 	}
 	app.setupRepository(conn)
 

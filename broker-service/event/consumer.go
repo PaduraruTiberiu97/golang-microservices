@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -39,6 +41,14 @@ func (consumer *Consumer) ensureExchange() error {
 type Payload struct {
 	Name string `json:"name"`
 	Data string `json:"data"`
+}
+
+func loggerServiceURL() string {
+	if url := os.Getenv("LOGGER_SERVICE_URL"); url != "" {
+		return url
+	}
+
+	return "http://logger-service/log"
 }
 
 func (consumer *Consumer) Listen(topics []string) error {
@@ -113,18 +123,19 @@ func dispatchPayload(payload Payload) {
 }
 
 func forwardLogEvent(entry Payload) error {
-	jsonData, _ := json.MarshalIndent(entry, "", "\t")
+	jsonData, err := json.Marshal(entry)
+	if err != nil {
+		return err
+	}
 
-	logServiceURL := "http://logger-service/log"
-
-	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest("POST", loggerServiceURL(), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}
 
 	request.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: 5 * time.Second}
 
 	response, err := client.Do(request)
 	if err != nil {

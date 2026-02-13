@@ -1,0 +1,8 @@
+# Exclude local build artifacts and VCS metadata from Docker context.
+mailerApp
+*.exe
+*.out
+.git
+.gitignore
+.idea
+.vscode

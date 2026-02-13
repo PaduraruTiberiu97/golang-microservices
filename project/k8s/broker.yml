@@ -25,6 +25,17 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          env:
+            - name: AUTH_SERVICE_URL
+              value: "http://authentication-service/authenticate"
+            - name: LOGGER_SERVICE_URL
+              value: "http://logger-service/log"
+            - name: LOGGER_RPC_ADDR
+              value: "logger-service:5001"
+            - name: LOGGER_GRPC_ADDR
+              value: "logger-service:50001"
+            - name: MAIL_SERVICE_URL
+              value: "http://mailer-service/send"
           ports:
             - containerPort: 80
 

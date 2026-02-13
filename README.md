@@ -51,7 +51,14 @@ This repository is a Go microservices playground with six services and two deplo
 ## Environment Variables
 
 ### `front-end`
-- `BROKER_URL` (example: `http://localhost:8000`)
+- `BROKER_URL` (example: `http://localhost:8000`; defaults to this value when unset)
+
+### `broker-service`
+- `AUTH_SERVICE_URL` (default: `http://authentication-service/authenticate`)
+- `MAIL_SERVICE_URL` (default: `http://mail-service/send`)
+- `LOGGER_SERVICE_URL` (default: `http://logger-service/log`; used by HTTP logging path)
+- `LOGGER_RPC_ADDR` (default: `logger-service:5001`)
+- `LOGGER_GRPC_ADDR` (default: `logger-service:50001`)
 
 ### `authentication-service`
 - `DSN` (PostgreSQL DSN)
@@ -68,6 +75,9 @@ This repository is a Go microservices playground with six services and two deplo
 
 ### `logger-service`
 - Mongo credentials are currently configured in code (`admin/password`) and expected to match container config.
+
+### `listener-service`
+- `LOGGER_SERVICE_URL` (default: `http://logger-service/log`)
 
 ## Run Locally (Docker Compose + Front-End Binary)
 
@@ -121,5 +131,4 @@ cd authentication-service && go test ./...
 
 ## Notes / Caveats In Current Code
 
-- Broker mail routing uses `http://mailer-service/send`; in Docker Compose the service name is `mail-service` (Kubernetes manifest uses `mailer-service`).
 - Repository currently contains built binaries (`authApp`, `brokerApp`, etc.) and runtime DB volume data under `project/db-data/`.

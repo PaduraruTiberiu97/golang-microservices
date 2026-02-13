@@ -64,7 +64,7 @@ func (app *Config) handleSubmission(w http.ResponseWriter, r *http.Request) {
 
 	switch requestPayload.Action {
 	case "auth":
-		app.forwardAuthRequest(w, r, requestPayload.Auth)
+		app.forwardAuthRequest(w, requestPayload.Auth)
 	case "log":
 		// app.logViaRabbitMQ(w, requestPayload.Log)
 		app.logViaRPC(w, requestPayload.Log)
@@ -79,14 +79,13 @@ func (app *Config) handleSubmission(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Config) forwardMailRequest(w http.ResponseWriter, mail MailPayload) {
-	jsonData, _ := json.MarshalIndent(mail, "", "\t")
+	jsonData, err := json.Marshal(mail)
+	if err != nil {
+		_ = app.writeErrorJSON(w, err)
+		return
+	}
 
-	// call the mail service
-	mailServiceURL := "http://mailer-service/send"
-
-	// post to mail-service
-
-	request, err := http.NewRequest("POST", mailServiceURL, bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest("POST", app.MailServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		_ = app.writeErrorJSON(w, err)
 		return
@@ -94,7 +93,7 @@ func (app *Config) forwardMailRequest(w http.ResponseWriter, mail MailPayload) {
 
 	request.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: 5 * time.Second}
 
 	response, err := client.Do(request)
 	if err != nil {
@@ -116,11 +115,13 @@ func (app *Config) forwardMailRequest(w http.ResponseWriter, mail MailPayload) {
 }
 
 func (app *Config) forwardLogRequestHTTP(w http.ResponseWriter, logPayload LogPayload) {
-	jsonData, _ := json.MarshalIndent(logPayload, "", "\t")
+	jsonData, err := json.Marshal(logPayload)
+	if err != nil {
+		_ = app.writeErrorJSON(w, err)
+		return
+	}
 
-	logServiceURL := "http://logger-service/log"
-
-	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest("POST", app.LoggerServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		_ = app.writeErrorJSON(w, err)
 		return
@@ -128,7 +129,7 @@ func (app *Config) forwardLogRequestHTTP(w http.ResponseWriter, logPayload LogPa
 
 	request.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: 5 * time.Second}
 
 	response, err := client.Do(request)
 	if err != nil {
@@ -149,18 +150,21 @@ func (app *Config) forwardLogRequestHTTP(w http.ResponseWriter, logPayload LogPa
 	_ = app.writeJSON(w, http.StatusOK, payload)
 }
 
-func (app *Config) forwardAuthRequest(w http.ResponseWriter, r *http.Request, authPayload AuthPayload) {
-	// create some JSON we'll send to the auth microservice
-	jsonData, _ := json.MarshalIndent(authPayload, "", "\t")
-
-	// call the service
-	request, err := http.NewRequest("POST", "http://authentication-service/authenticate", bytes.NewBuffer(jsonData))
+func (app *Config) forwardAuthRequest(w http.ResponseWriter, authPayload AuthPayload) {
+	jsonData, err := json.Marshal(authPayload)
 	if err != nil {
 		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
-	client := &http.Client{}
+	request, err := http.NewRequest("POST", app.AuthServiceURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		_ = app.writeErrorJSON(w, err)
+		return
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 5 * time.Second}
 	response, err := client.Do(request)
 	if err != nil {
 		_ = app.writeErrorJSON(w, err)
@@ -168,32 +172,28 @@ func (app *Config) forwardAuthRequest(w http.ResponseWriter, r *http.Request, au
 	}
 	defer response.Body.Close()
 
-	// make sure we get back the correct status code
 	if response.StatusCode == http.StatusUnauthorized {
 		_ = app.writeErrorJSON(w, errors.New("invalid credentials"))
 		return
-	} else if response.StatusCode != http.StatusAccepted {
+	}
+	if response.StatusCode != http.StatusAccepted {
 		_ = app.writeErrorJSON(w, errors.New("error calling auth service"))
 		return
 	}
 
-	// create a variable we'll read response.Body into
 	var jsonFromService JsonResponse
 
-	//decode the JSON from the auth service
 	err = json.NewDecoder(response.Body).Decode(&jsonFromService)
 	if err != nil {
 		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
-	// if we get an error message in jsonFromService.Error == true
 	if jsonFromService.Error {
 		_ = app.writeErrorJSON(w, errors.New(jsonFromService.Message))
 		return
 	}
 
-	// everything worked, send the jsonFromService back to the caller
 	var payload JsonResponse
 	payload.Error = false
 	payload.Message = "Authenticated!"
@@ -227,7 +227,11 @@ func (app *Config) publishLogEvent(name, msg string) error {
 		Data: msg,
 	}
 
-	jsonData, _ := json.MarshalIndent(&payload, "", "\t")
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
 	err = emitter.Publish(string(jsonData), "log.INFO")
 	if err != nil {
 		return err
@@ -241,11 +245,12 @@ type RPCPayload struct {
 }
 
 func (app *Config) logViaRPC(w http.ResponseWriter, logPayload LogPayload) {
-	client, err := rpc.Dial("tcp", "logger-service:5001")
+	client, err := rpc.Dial("tcp", app.LoggerRPCAddr)
 	if err != nil {
 		_ = app.writeErrorJSON(w, err)
 		return
 	}
+	defer client.Close()
 
 	var rpcPayload RPCPayload
 	rpcPayload.Name = logPayload.Name
@@ -279,7 +284,7 @@ func (app *Config) logViaGRPC(w http.ResponseWriter, r *http.Request) {
 
 	conn, err := grpc.DialContext(
 		dialCtx,
-		"logger-service:50001",
+		app.LoggerGRPCAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 	)

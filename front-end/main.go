@@ -44,6 +44,9 @@ func renderTemplate(w http.ResponseWriter, pageTemplate string) {
 	}
 
 	data.BrokerURL = os.Getenv("BROKER_URL")
+	if data.BrokerURL == "" {
+		data.BrokerURL = "http://localhost:8000"
+	}
 
 	if err := tmpl.Execute(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

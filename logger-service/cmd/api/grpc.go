@@ -19,6 +19,9 @@ type LogServer struct {
 // Write persists a log entry received from gRPC clients.
 func (l *LogServer) Write(ctx context.Context, req *logs.LogRequest) (*logs.LogResponse, error) {
 	input := req.GetLogEntry()
+	if input == nil {
+		return &logs.LogResponse{Result: "failed: empty payload"}, nil
+	}
 
 	// write the log
 	logEntry := data.LogEntry{

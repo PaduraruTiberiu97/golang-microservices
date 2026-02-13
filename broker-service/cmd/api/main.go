@@ -15,7 +15,12 @@ import (
 const httpPort = "80"
 
 type Config struct {
-	Rabbit *amqp.Connection
+	Rabbit           *amqp.Connection
+	AuthServiceURL   string
+	MailServiceURL   string
+	LoggerServiceURL string
+	LoggerRPCAddr    string
+	LoggerGRPCAddr   string
 }
 
 func main() {
@@ -27,7 +32,12 @@ func main() {
 	defer rabbitmqConn.Close()
 
 	app := Config{
-		Rabbit: rabbitmqConn,
+		Rabbit:           rabbitmqConn,
+		AuthServiceURL:   getenv("AUTH_SERVICE_URL", "http://authentication-service/authenticate"),
+		MailServiceURL:   getenv("MAIL_SERVICE_URL", "http://mail-service/send"),
+		LoggerServiceURL: getenv("LOGGER_SERVICE_URL", "http://logger-service/log"),
+		LoggerRPCAddr:    getenv("LOGGER_RPC_ADDR", "logger-service:5001"),
+		LoggerGRPCAddr:   getenv("LOGGER_GRPC_ADDR", "logger-service:50001"),
 	}
 
 	log.Printf("Starting broker service on port %s\n", httpPort)
@@ -51,7 +61,7 @@ func connectToRabbitMQ() (*amqp.Connection, error) {
 	for {
 		conn, err := amqp.Dial("amqp://guest:guest@rabbitmq")
 		if err != nil {
-			fmt.Println("RabbitMq not yet ready...")
+			log.Println("RabbitMQ not yet ready...")
 			attempts++
 		} else {
 			log.Println("Connected to RabbitMQ")
@@ -60,7 +70,7 @@ func connectToRabbitMQ() (*amqp.Connection, error) {
 		}
 
 		if attempts > 5 {
-			fmt.Println("Too many attempts to connect to RabbitMQ. Exiting...", err)
+			log.Println("Too many attempts to connect to RabbitMQ. Exiting...", err)
 			return nil, err
 		}
 
@@ -72,4 +82,13 @@ func connectToRabbitMQ() (*amqp.Connection, error) {
 	}
 
 	return connection, nil
+}
+
+func getenv(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	return value
 }

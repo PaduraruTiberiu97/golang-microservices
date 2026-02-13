@@ -2,13 +2,13 @@
 package main
 
 import (
-	"context"
 	"log"
 	"log-service/data"
-	"time"
 )
 
-type RPCServer struct{}
+type RPCServer struct {
+	Models data.Models
+}
 
 type RPCPayload struct {
 	Name string `json:"name"`
@@ -17,11 +17,9 @@ type RPCPayload struct {
 
 // LogInfo is called remotely by broker-service to persist a log entry.
 func (r *RPCServer) LogInfo(payload RPCPayload, response *string) error {
-	collection := mongoClient.Database("logs").Collection("logs")
-	_, err := collection.InsertOne(context.TODO(), data.LogEntry{
-		Name:      payload.Name,
-		Data:      payload.Data,
-		CreatedAt: time.Now(),
+	err := r.Models.LogEntry.Insert(data.LogEntry{
+		Name: payload.Name,
+		Data: payload.Data,
 	})
 	if err != nil {
 		log.Println("error writing to Mongo: ", err)
