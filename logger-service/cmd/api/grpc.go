@@ -40,10 +40,10 @@ func (l *LogServer) Write(ctx context.Context, req *logs.LogRequest) (*logs.LogR
 	return res, nil
 }
 
-func (app *Config) listenGRPC() {
+func (app *Config) listenGRPC() error {
 	lis, err := net.Listen("tcp", ":"+grpcPort)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return err
 	}
 
 	grpcServer := grpc.NewServer()
@@ -52,6 +52,8 @@ func (app *Config) listenGRPC() {
 
 	log.Printf("gRPC server started on port %s", grpcPort)
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		return err
 	}
+
+	return nil
 }

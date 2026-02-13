@@ -24,6 +24,13 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          env:
+            - name: MONGO_URI
+              value: "mongodb://mongo:27017"
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: "admin"
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: "password"
           ports:
             - containerPort: 80
             - containerPort: 5001

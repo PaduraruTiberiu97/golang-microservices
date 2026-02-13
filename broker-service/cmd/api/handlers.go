@@ -41,6 +41,14 @@ type LogPayload struct {
 	Data string `json:"data"`
 }
 
+func (app *Config) downstreamHTTPClient() *http.Client {
+	if app.HTTPClient != nil {
+		return app.HTTPClient
+	}
+
+	return &http.Client{Timeout: 5 * time.Second}
+}
+
 func (app *Config) handleBroker(w http.ResponseWriter, r *http.Request) {
 	payload := JsonResponse{
 		Error:   false,
@@ -85,17 +93,14 @@ func (app *Config) forwardMailRequest(w http.ResponseWriter, mail MailPayload) {
 		return
 	}
 
-	request, err := http.NewRequest("POST", app.MailServiceURL, bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(http.MethodPost, app.MailServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
 	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{Timeout: 5 * time.Second}
-
-	response, err := client.Do(request)
+	response, err := app.downstreamHTTPClient().Do(request)
 	if err != nil {
 		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
@@ -121,17 +126,14 @@ func (app *Config) forwardLogRequestHTTP(w http.ResponseWriter, logPayload LogPa
 		return
 	}
 
-	request, err := http.NewRequest("POST", app.LoggerServiceURL, bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(http.MethodPost, app.LoggerServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		_ = app.writeErrorJSON(w, err)
 		return
 	}
 
 	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{Timeout: 5 * time.Second}
-
-	response, err := client.Do(request)
+	response, err := app.downstreamHTTPClient().Do(request)
 	if err != nil {
 		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
@@ -157,15 +159,14 @@ func (app *Config) forwardAuthRequest(w http.ResponseWriter, authPayload AuthPay
 		return
 	}
 
-	request, err := http.NewRequest("POST", app.AuthServiceURL, bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(http.MethodPost, app.AuthServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		_ = app.writeErrorJSON(w, err)
 		return
 	}
 	request.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 5 * time.Second}
-	response, err := client.Do(request)
+	response, err := app.downstreamHTTPClient().Do(request)
 	if err != nil {
 		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return

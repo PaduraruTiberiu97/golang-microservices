@@ -4,6 +4,7 @@ package event
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,6 +17,8 @@ import (
 type Consumer struct {
 	conn *amqp.Connection
 }
+
+var consumerHTTPClient = &http.Client{Timeout: 5 * time.Second}
 
 func NewConsumer(conn *amqp.Connection) (Consumer, error) {
 	consumer := Consumer{conn: conn}
@@ -89,36 +92,27 @@ func (consumer *Consumer) Listen(topics []string) error {
 		return err
 	}
 
-	forever := make(chan bool)
-	go func() {
-		for d := range messages {
-			var payload Payload
-			_ = json.Unmarshal(d.Body, &payload)
-
-			go dispatchPayload(payload)
+	log.Printf("Waiting for messages on exchange [Exchange, Queue] [logs_topic, %s]", queue.Name)
+	for d := range messages {
+		var payload Payload
+		if err := json.Unmarshal(d.Body, &payload); err != nil {
+			log.Printf("Error decoding queue payload: %v", err)
+			continue
 		}
-	}()
 
-	fmt.Printf("Waiting for message on exchange [Exchange, Queue] [logs_topic, %s]", queue.Name)
-	<-forever
+		go dispatchPayload(payload)
+	}
 
-	return nil
+	return errors.New("message channel closed")
 }
 
 func dispatchPayload(payload Payload) {
-	switch payload.Name {
-	case "log", "event":
-		err := forwardLogEvent(payload)
-		if err != nil {
-			log.Printf("Error handling payload: %s", err)
-		}
-	case "auth":
-		//
-	default:
-		err := forwardLogEvent(payload)
-		if err != nil {
-			log.Printf("Error handling payload: %s", err)
-		}
+	if payload.Name == "auth" {
+		return
+	}
+
+	if err := forwardLogEvent(payload); err != nil {
+		log.Printf("Error handling payload: %v", err)
 	}
 }
 
@@ -128,16 +122,14 @@ func forwardLogEvent(entry Payload) error {
 		return err
 	}
 
-	request, err := http.NewRequest("POST", loggerServiceURL(), bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest(http.MethodPost, loggerServiceURL(), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}
 
 	request.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 5 * time.Second}
-
-	response, err := client.Do(request)
+	response, err := consumerHTTPClient.Do(request)
 	if err != nil {
 		return err
 	}

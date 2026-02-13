@@ -26,6 +26,8 @@ spec:
           env:
             - name: DSN
               value: "host=host.minikube.internal port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5"
+            - name: LOGGER_SERVICE_URL
+              value: "http://logger-service/log"
           ports:
             - containerPort: 80
 

@@ -7,15 +7,27 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		renderTemplate(w, "test.page.gohtml")
 	})
 
 	fmt.Println("Starting front end service on port 8081")
-	if err := http.ListenAndServe(":8081", nil); err != nil {
+	server := &http.Server{
+		Addr:              ":8081",
+		Handler:           nil,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
 		log.Panic(err)
 	}
 }
@@ -43,12 +55,17 @@ func renderTemplate(w http.ResponseWriter, pageTemplate string) {
 		BrokerURL string
 	}
 
-	data.BrokerURL = os.Getenv("BROKER_URL")
-	if data.BrokerURL == "" {
-		data.BrokerURL = "http://localhost:8000"
-	}
+	data.BrokerURL = brokerURLFromEnv()
 
 	if err := tmpl.Execute(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func brokerURLFromEnv() string {
+	if value := os.Getenv("BROKER_URL"); value != "" {
+		return value
+	}
+
+	return "http://localhost:8000"
 }

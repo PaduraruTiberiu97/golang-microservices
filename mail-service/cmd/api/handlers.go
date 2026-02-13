@@ -1,21 +1,38 @@
 // Package main defines mail-service HTTP handlers.
 package main
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+	"strings"
+)
+
+type SendMailRequest struct {
+	From    string `json:"from"`
+	To      string `json:"to"`
+	Subject string `json:"subject"`
+	Message string `json:"message"`
+}
 
 func (app *Config) handleSendMail(w http.ResponseWriter, r *http.Request) {
-	type mailMessage struct {
-		From    string `json:"from"`
-		To      string `json:"to"`
-		Subject string `json:"subject"`
-		Message string `json:"message"`
-	}
-
-	var requestPayload mailMessage
+	var requestPayload SendMailRequest
 
 	err := app.decodeJSON(w, r, &requestPayload)
 	if err != nil {
-		app.writeErrorJSON(w, err, http.StatusBadRequest)
+		_ = app.writeErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	if strings.TrimSpace(requestPayload.To) == "" {
+		_ = app.writeErrorJSON(w, errors.New("to is required"), http.StatusBadRequest)
+		return
+	}
+	if strings.TrimSpace(requestPayload.Subject) == "" {
+		_ = app.writeErrorJSON(w, errors.New("subject is required"), http.StatusBadRequest)
+		return
+	}
+	if strings.TrimSpace(requestPayload.Message) == "" {
+		_ = app.writeErrorJSON(w, errors.New("message is required"), http.StatusBadRequest)
 		return
 	}
 
@@ -28,7 +45,7 @@ func (app *Config) handleSendMail(w http.ResponseWriter, r *http.Request) {
 
 	err = app.Mailer.SendSMTPMessage(msg)
 	if err != nil {
-		app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err)
 		return
 	}
 

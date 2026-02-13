@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,10 +17,12 @@ import (
 )
 
 const (
-	httpPort = "80"
-	rpcPort  = "5001"
-	mongoURL = "mongodb://mongo:27017"
-	grpcPort = "50001"
+	httpPort             = "80"
+	rpcPort              = "5001"
+	grpcPort             = "50001"
+	defaultMongoURI      = "mongodb://mongo:27017"
+	defaultMongoUsername = "admin"
+	defaultMongoPassword = "password"
 )
 
 var mongoClient *mongo.Client
@@ -54,14 +57,23 @@ func main() {
 		log.Panic(err)
 	}
 
-	go app.listenRPC()
-	go app.listenGRPC()
+	go func() {
+		if rpcErr := app.listenRPC(); rpcErr != nil {
+			log.Panic(rpcErr)
+		}
+	}()
+	go func() {
+		if grpcErr := app.listenGRPC(); grpcErr != nil {
+			log.Panic(grpcErr)
+		}
+	}()
 
 	// Start HTTP server.
 	log.Println("Starting logger-service on port", httpPort)
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", httpPort),
-		Handler: app.routes(),
+		Addr:              fmt.Sprintf(":%s", httpPort),
+		Handler:           app.routes(),
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	if err = srv.ListenAndServe(); err != nil {
@@ -89,11 +101,16 @@ func (app *Config) listenRPC() error {
 }
 
 func connectMongo() (*mongo.Client, error) {
-	clientOptions := options.Client().ApplyURI(mongoURL)
-	clientOptions.SetAuth(options.Credential{
-		Username: "admin",
-		Password: "password",
-	})
+	clientOptions := options.Client().ApplyURI(getenv("MONGO_URI", defaultMongoURI))
+
+	username := getenv("MONGO_INITDB_ROOT_USERNAME", defaultMongoUsername)
+	password := getenv("MONGO_INITDB_ROOT_PASSWORD", defaultMongoPassword)
+	if username != "" {
+		clientOptions.SetAuth(options.Credential{
+			Username: username,
+			Password: password,
+		})
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -110,4 +127,13 @@ func connectMongo() (*mongo.Client, error) {
 
 	log.Println("Connected to MongoDB")
 	return connection, nil
+}
+
+func getenv(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	return value
 }

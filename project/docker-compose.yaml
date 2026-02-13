@@ -13,6 +13,7 @@ services:
       LOGGER_RPC_ADDR: "logger-service:5001"
       LOGGER_GRPC_ADDR: "logger-service:50001"
       MAIL_SERVICE_URL: "http://mail-service/send"
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq"
     deploy:
       mode: replicated
       replicas: 1
@@ -43,6 +44,10 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+    environment:
+      MONGO_URI: "mongodb://mongo:27017"
+      MONGO_INITDB_ROOT_USERNAME: "admin"
+      MONGO_INITDB_ROOT_PASSWORD: "password"
 
   listener-service:
     build:
@@ -52,6 +57,9 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+    environment:
+      LOGGER_SERVICE_URL: "http://logger-service/log"
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq"
 
   authentication-service:
     build:
@@ -65,6 +73,7 @@ services:
       replicas: 1
     environment:
       DSN: "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5"
+      LOGGER_SERVICE_URL: "http://logger-service/log"
 
   postgres:
     image: "postgres:14.2"

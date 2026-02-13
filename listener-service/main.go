@@ -4,19 +4,19 @@ package main
 import (
 	"listener/event"
 	"log"
-	"math"
 	"os"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+const defaultRabbitMQURL = "amqp://guest:guest@rabbitmq"
+
 func main() {
 	// try to connect to RabbitMQ
 	rabbitmqConn, err := connectToRabbitMQ()
 	if err != nil {
 		log.Fatal("Could not connect to RabbitMQ. Exiting...", err)
-		os.Exit(1)
 	}
 	defer rabbitmqConn.Close()
 	// start listening to messages
@@ -39,9 +39,10 @@ func connectToRabbitMQ() (*amqp.Connection, error) {
 	var attempts int64
 	backoff := 1 * time.Second
 	var connection *amqp.Connection
+	rabbitMQURL := getenv("RABBITMQ_URL", defaultRabbitMQURL)
 
 	for {
-		conn, err := amqp.Dial("amqp://guest:guest@rabbitmq")
+		conn, err := amqp.Dial(rabbitMQURL)
 		if err != nil {
 			log.Println("RabbitMQ not yet ready...")
 			attempts++
@@ -56,12 +57,19 @@ func connectToRabbitMQ() (*amqp.Connection, error) {
 			return nil, err
 		}
 
-		backoff = time.Duration(math.Pow(float64(attempts), 2)) * time.Second
+		backoff = time.Duration(attempts*attempts) * time.Second
 		log.Println("Backing off for", backoff)
 		time.Sleep(backoff)
-
-		continue
 	}
 
 	return connection, nil
+}
+
+func getenv(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	return value
 }

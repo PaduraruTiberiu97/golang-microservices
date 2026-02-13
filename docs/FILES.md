@@ -36,6 +36,7 @@ This document covers the full source/configuration surface of the repository and
 - `authentication-service/cmd/api/setup_test.go`: test bootstrap that injects `PostgresTestRepository` into shared test config.
 - `authentication-service/cmd/api/routes_test.go`: asserts expected routes exist in router configuration.
 - `authentication-service/cmd/api/handlers_test.go`: handler-level test with custom HTTP transport to mock downstream logger call.
+- `authentication-service/cmd/api/main_test.go`: verifies authentication environment helper fallback/override behavior.
 - `authentication-service/data/repository.go`: repository interface contract used by handlers and tests.
 - `authentication-service/data/models.go`: Postgres repository implementation for CRUD, password hashing, and password verification.
 - `authentication-service/data/test-models.go`: test repository implementation returning deterministic fixture-like user responses.
@@ -50,9 +51,13 @@ This document covers the full source/configuration surface of the repository and
 - `broker-service/cmd/api/routes.go`: route registration for broker entrypoint, submission handler, gRPC logging endpoint, and heartbeat.
 - `broker-service/cmd/api/helpers.go`: JSON request/response helpers and consistent error payload formatting.
 - `broker-service/cmd/api/handlers.go`: core orchestration logic for `auth`, `log`, and `mail` actions; includes HTTP, RPC, gRPC, and optional RabbitMQ logging paths.
+- `broker-service/cmd/api/routes_test.go`: asserts that expected broker HTTP routes are registered.
+- `broker-service/cmd/api/handlers_test.go`: verifies broker handler/forwarding behavior across HTTP, RPC, and gRPC paths.
+- `broker-service/cmd/api/main_test.go`: verifies broker environment helper fallback/override behavior.
 - `broker-service/event/event.go`: RabbitMQ exchange/queue declaration helpers shared by consumer and emitter.
 - `broker-service/event/emitter.go`: RabbitMQ publisher implementation for topic exchange events.
 - `broker-service/event/consumer.go`: RabbitMQ consumer implementation and forwarding logic to logger HTTP endpoint.
+- `broker-service/event/consumer_test.go`: verifies logger URL selection and HTTP forwarding behavior in the consumer helper.
 - `broker-service/logs/logs.proto`: protobuf service contract for gRPC log write operations.
 - `broker-service/logs/logs.pb.go`: generated protobuf message code for `Log`, `LogRequest`, `LogResponse`.
 - `broker-service/logs/logs_grpc.pb.go`: generated gRPC client/server stubs for `LogService`.
@@ -62,6 +67,7 @@ This document covers the full source/configuration surface of the repository and
 
 - `front-end/go.mod`: front-end module declaration.
 - `front-end/main.go`: web server entrypoint, template rendering pipeline, and `BROKER_URL` template data injection.
+- `front-end/main_test.go`: verifies `BROKER_URL` environment fallback/override behavior.
 - `front-end/templates/base.layout.gohtml`: base HTML layout with content and JS blocks.
 - `front-end/templates/header.partial.gohtml`: document head metadata and Bootstrap CSS include.
 - `front-end/templates/footer.partial.gohtml`: page footer markup.
@@ -74,8 +80,10 @@ This document covers the full source/configuration surface of the repository and
 - `listener-service/go.sum`: dependency checksums.
 - `listener-service/listener-service.dockerfile`: Alpine runtime image that copies and runs `listenerApp`.
 - `listener-service/main.go`: listener bootstrap and RabbitMQ connection/retry setup; subscribes to log severity topics.
+- `listener-service/main_test.go`: verifies listener environment helper fallback/override behavior.
 - `listener-service/event/event.go`: exchange and queue declaration helpers for RabbitMQ topic consumption.
 - `listener-service/event/consumer.go`: long-running topic consumer; decodes payload and forwards log events to logger HTTP API.
+- `listener-service/event/consumer_test.go`: verifies logger URL selection and HTTP forwarding behavior in the consumer helper.
 - `listener-service/listenerApp`: compiled Linux ARM64 listener binary (build artifact, not source).
 
 ## `logger-service/`
@@ -87,6 +95,9 @@ This document covers the full source/configuration surface of the repository and
 - `logger-service/cmd/api/routes.go`: HTTP routing for `/log` and heartbeat endpoint.
 - `logger-service/cmd/api/helpers.go`: JSON decoding/encoding helpers and standardized error responses.
 - `logger-service/cmd/api/handlers.go`: HTTP handler accepting log entries and inserting into MongoDB.
+- `logger-service/cmd/api/routes_test.go`: asserts that expected logger HTTP routes are registered.
+- `logger-service/cmd/api/handlers_test.go`: verifies logger handler behavior for invalid payloads and storage-layer failures.
+- `logger-service/cmd/api/main_test.go`: verifies logger environment helper fallback/override behavior.
 - `logger-service/cmd/api/rpc.go`: net/rpc endpoint implementation (`LogInfo`) for broker-to-logger RPC logging.
 - `logger-service/cmd/api/grpc.go`: gRPC server implementation for `logs.LogService/Write`.
 - `logger-service/data/models.go`: Mongo-backed data layer for inserting, listing, fetching, dropping, and updating log entries.
@@ -105,6 +116,10 @@ This document covers the full source/configuration surface of the repository and
 - `mail-service/cmd/api/helpers.go`: JSON request/response helpers and error response shaping.
 - `mail-service/cmd/api/handlers.go`: `/send` handler that parses request payload and dispatches SMTP send.
 - `mail-service/cmd/api/mailer.go`: SMTP client abstraction, HTML/plain template rendering, CSS inlining, encryption mode mapping, and send logic.
+- `mail-service/cmd/api/routes_test.go`: asserts that expected mail-service HTTP routes are registered.
+- `mail-service/cmd/api/handlers_test.go`: verifies request validation and malformed payload handling for the send-mail endpoint.
+- `mail-service/cmd/api/main_test.go`: verifies mailer environment parsing and fallback behavior.
+- `mail-service/cmd/api/mailer_test.go`: verifies SMTP encryption mode mapping helper behavior.
 - `mail-service/templates/mail.html.gohtml`: HTML email body template.
 - `mail-service/templates/mail.plain.gohtml`: plain-text email body template.
 - `mail-service/mailerApp`: compiled Linux ARM64 mail service binary (build artifact, not source).

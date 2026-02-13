@@ -59,9 +59,11 @@ This repository is a Go microservices playground with six services and two deplo
 - `LOGGER_SERVICE_URL` (default: `http://logger-service/log`; used by HTTP logging path)
 - `LOGGER_RPC_ADDR` (default: `logger-service:5001`)
 - `LOGGER_GRPC_ADDR` (default: `logger-service:50001`)
+- `RABBITMQ_URL` (default: `amqp://guest:guest@rabbitmq`)
 
 ### `authentication-service`
 - `DSN` (PostgreSQL DSN)
+- `LOGGER_SERVICE_URL` (default: `http://logger-service/log`)
 
 ### `mail-service`
 - `MAIL_DOMAIN`
@@ -74,10 +76,13 @@ This repository is a Go microservices playground with six services and two deplo
 - `MAIL_ADDRESS`
 
 ### `logger-service`
-- Mongo credentials are currently configured in code (`admin/password`) and expected to match container config.
+- `MONGO_URI` (default: `mongodb://mongo:27017`)
+- `MONGO_INITDB_ROOT_USERNAME` (default: `admin`)
+- `MONGO_INITDB_ROOT_PASSWORD` (default: `password`)
 
 ### `listener-service`
 - `LOGGER_SERVICE_URL` (default: `http://logger-service/log`)
+- `RABBITMQ_URL` (default: `amqp://guest:guest@rabbitmq`)
 
 ## Run Locally (Docker Compose + Front-End Binary)
 
@@ -120,9 +125,14 @@ kubectl apply -f project/ingress.yml
 find authentication-service broker-service front-end listener-service logger-service mail-service -type f -name '*.go' ! -name '*.pb.go' -print0 | xargs -0 gofmt -w
 ```
 
-- Run tests (currently auth-service has tests):
+- Run tests:
 ```bash
 cd authentication-service && go test ./...
+cd ../broker-service && go test ./...
+cd ../logger-service && go test ./...
+cd ../mail-service && go test ./...
+cd ../listener-service && go test ./...
+cd ../front-end && go test ./...
 ```
 
 ## Documentation

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 type Config struct {
@@ -22,8 +23,9 @@ func main() {
 	log.Println("Starting mail service on port ", httpPort)
 
 	srv := &http.Server{
-		Addr:    ":" + httpPort,
-		Handler: app.routes(),
+		Addr:              ":" + httpPort,
+		Handler:           app.routes(),
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	if err := srv.ListenAndServe(); err != nil {

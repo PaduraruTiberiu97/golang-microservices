@@ -17,9 +17,13 @@ import (
 
 const httpPort = "80"
 
+const defaultPostgresDSN = "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5"
+const defaultLoggerServiceURL = "http://logger-service/log"
+
 type Config struct {
-	Repository data.Repository
-	HTTPClient *http.Client
+	Repository       data.Repository
+	HTTPClient       *http.Client
+	LoggerServiceURL string
 }
 
 func main() {
@@ -34,12 +38,15 @@ func main() {
 		HTTPClient: &http.Client{
 			Timeout: 5 * time.Second,
 		},
+		LoggerServiceURL: getenv("LOGGER_SERVICE_URL", defaultLoggerServiceURL),
 	}
 	app.setupRepository(conn)
+	defer conn.Close()
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%s", httpPort),
-		Handler: app.routes(),
+		Addr:              fmt.Sprintf(":%s", httpPort),
+		Handler:           app.routes(),
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	if err := server.ListenAndServe(); err != nil {
@@ -62,7 +69,7 @@ func openPostgresDB(dsn string) (*sql.DB, error) {
 }
 
 func connectToPostgres() *sql.DB {
-	dsn := os.Getenv("DSN")
+	dsn := getenv("DSN", defaultPostgresDSN)
 	var attempts int64
 
 	for {
@@ -84,6 +91,15 @@ func connectToPostgres() *sql.DB {
 		time.Sleep(2 * time.Second)
 		continue
 	}
+}
+
+func getenv(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	return value
 }
 
 func (app *Config) setupRepository(conn *sql.DB) {

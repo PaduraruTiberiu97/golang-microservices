@@ -69,21 +69,25 @@ func (app *Config) handleAuthenticate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Config) logAuthenticationEvent(name, data string) error {
-	var entry struct {
+	entry := struct {
 		Name string `json:"name"`
 		Data string `json:"data"`
+	}{
+		Name: name,
+		Data: data,
 	}
-
-	entry.Name = name
-	entry.Data = data
 
 	jsonData, err := json.Marshal(entry)
 	if err != nil {
 		return err
 	}
-	logServiceURL := "http://logger-service/log"
 
-	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
+	logServiceURL := app.LoggerServiceURL
+	if logServiceURL == "" {
+		logServiceURL = defaultLoggerServiceURL
+	}
+
+	request, err := http.NewRequest(http.MethodPost, logServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}

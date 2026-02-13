@@ -36,6 +36,8 @@ spec:
               value: "logger-service:50001"
             - name: MAIL_SERVICE_URL
               value: "http://mailer-service/send"
+            - name: RABBITMQ_URL
+              value: "amqp://guest:guest@rabbitmq"
           ports:
             - containerPort: 80
 

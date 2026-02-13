@@ -53,6 +53,12 @@ build/
 *.exe
 *.out
 *.app
+authApp
+brokerApp
+frontApp
+listenerApp
+loggerServiceApp
+mailerApp
 
 ############################
 # Test / coverage

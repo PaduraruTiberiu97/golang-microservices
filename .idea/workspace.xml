@@ -5,10 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0d80dc1-35b7-4b6f-8b4a-93fe390e4b77" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-service/cmd/api/handlers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-service/cmd/api/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/broker-service/brokerApp" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/brokerApp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/data/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/data/models.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/broker-service/event/consumer.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/event/consumer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/FILES.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/FILES.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listener-service/event/consumer.go" beforeDir="false" afterPath="$PROJECT_DIR$/listener-service/event/consumer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listener-service/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/listener-service/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/grpc.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/grpc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mail-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/mail-service/cmd/api/handlers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mail-service/cmd/api/handlers_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/mail-service/cmd/api/handlers_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mail-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/mail-service/cmd/api/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/project/docker-compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/k8s/authentication.yml" beforeDir="false" afterPath="$PROJECT_DIR$/project/k8s/authentication.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/k8s/broker.yml" beforeDir="false" afterPath="$PROJECT_DIR$/project/k8s/broker.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/k8s/listener.yml" beforeDir="false" afterPath="$PROJECT_DIR$/project/k8s/listener.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/k8s/logger.yml" beforeDir="false" afterPath="$PROJECT_DIR$/project/k8s/logger.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
