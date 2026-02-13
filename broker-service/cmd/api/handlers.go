@@ -55,7 +55,7 @@ func (app *Config) handleSubmission(w http.ResponseWriter, r *http.Request) {
 
 	err := app.decodeJSON(w, r, &requestPayload)
 	if err != nil {
-		err := app.writeErrorJSON(w, err)
+		err := app.writeErrorJSON(w, err, http.StatusBadRequest)
 		if err != nil {
 			return
 		}
@@ -71,7 +71,7 @@ func (app *Config) handleSubmission(w http.ResponseWriter, r *http.Request) {
 	case "mail":
 		app.forwardMailRequest(w, requestPayload.Mail)
 	default:
-		err := app.writeErrorJSON(w, errors.New("invalid action"))
+		err := app.writeErrorJSON(w, errors.New("invalid action"), http.StatusBadRequest)
 		if err != nil {
 			return
 		}
@@ -97,13 +97,13 @@ func (app *Config) forwardMailRequest(w http.ResponseWriter, mail MailPayload) {
 
 	response, err := client.Do(request)
 	if err != nil {
-		_ = app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-		_ = app.writeErrorJSON(w, fmt.Errorf("mail service returned status %d", response.StatusCode))
+		_ = app.writeErrorJSON(w, fmt.Errorf("mail service returned status %d", response.StatusCode), http.StatusBadGateway)
 		return
 	}
 
@@ -133,13 +133,13 @@ func (app *Config) forwardLogRequestHTTP(w http.ResponseWriter, logPayload LogPa
 
 	response, err := client.Do(request)
 	if err != nil {
-		_ = app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-		_ = app.writeErrorJSON(w, fmt.Errorf("log service returned status %d", response.StatusCode))
+		_ = app.writeErrorJSON(w, fmt.Errorf("log service returned status %d", response.StatusCode), http.StatusBadGateway)
 		return
 	}
 
@@ -167,17 +167,17 @@ func (app *Config) forwardAuthRequest(w http.ResponseWriter, authPayload AuthPay
 	client := &http.Client{Timeout: 5 * time.Second}
 	response, err := client.Do(request)
 	if err != nil {
-		_ = app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode == http.StatusUnauthorized {
-		_ = app.writeErrorJSON(w, errors.New("invalid credentials"))
+		_ = app.writeErrorJSON(w, errors.New("invalid credentials"), http.StatusUnauthorized)
 		return
 	}
 	if response.StatusCode != http.StatusAccepted {
-		_ = app.writeErrorJSON(w, errors.New("error calling auth service"))
+		_ = app.writeErrorJSON(w, errors.New("error calling auth service"), http.StatusBadGateway)
 		return
 	}
 
@@ -185,12 +185,12 @@ func (app *Config) forwardAuthRequest(w http.ResponseWriter, authPayload AuthPay
 
 	err = json.NewDecoder(response.Body).Decode(&jsonFromService)
 	if err != nil {
-		_ = app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
 	}
 
 	if jsonFromService.Error {
-		_ = app.writeErrorJSON(w, errors.New(jsonFromService.Message))
+		_ = app.writeErrorJSON(w, errors.New(jsonFromService.Message), http.StatusUnauthorized)
 		return
 	}
 
@@ -247,7 +247,7 @@ type RPCPayload struct {
 func (app *Config) logViaRPC(w http.ResponseWriter, logPayload LogPayload) {
 	client, err := rpc.Dial("tcp", app.LoggerRPCAddr)
 	if err != nil {
-		_ = app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
 	}
 	defer client.Close()
@@ -259,7 +259,7 @@ func (app *Config) logViaRPC(w http.ResponseWriter, logPayload LogPayload) {
 	var result string
 	err = client.Call("RPCServer.LogInfo", rpcPayload, &result)
 	if err != nil {
-		_ = app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
 	}
 
@@ -275,7 +275,7 @@ func (app *Config) logViaGRPC(w http.ResponseWriter, r *http.Request) {
 
 	err := app.decodeJSON(w, r, &requestPayload)
 	if err != nil {
-		_ = app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -289,7 +289,7 @@ func (app *Config) logViaGRPC(w http.ResponseWriter, r *http.Request) {
 		grpc.WithBlock(),
 	)
 	if err != nil {
-		_ = app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
 	}
 
@@ -307,7 +307,7 @@ func (app *Config) logViaGRPC(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		_ = app.writeErrorJSON(w, err)
+		_ = app.writeErrorJSON(w, err, http.StatusBadGateway)
 		return
 	}
 

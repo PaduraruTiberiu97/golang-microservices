@@ -5,33 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0d80dc1-35b7-4b6f-8b4a-93fe390e4b77" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-service/authentication-service.dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-service/authentication-service.dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-service/cmd/api/handlers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-service/cmd/api/handlers_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-service/cmd/api/handlers_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-service/cmd/api/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-service/cmd/api/helpers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-service/cmd/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-service/data/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-service/data/models.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/broker-service/broker-service.dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/broker-service.dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/broker-service/brokerApp" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/brokerApp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/handlers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/helpers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/broker-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/cmd/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/broker-service/event/consumer.go" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/event/consumer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listener-service/event/consumer.go" beforeDir="false" afterPath="$PROJECT_DIR$/listener-service/event/consumer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listener-service/listener-service.dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/listener-service/listener-service.dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listener-service/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/listener-service/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/grpc.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/grpc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/helpers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/cmd/api/rpc.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/cmd/api/rpc.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logger-service/data/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/data/models.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger-service/logger-service.dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/logger-service/logger-service.dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mail-service/mail-service.dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/mail-service/mail-service.dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/project/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/k8s/broker.yml" beforeDir="false" afterPath="$PROJECT_DIR$/project/k8s/broker.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

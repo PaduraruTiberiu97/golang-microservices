@@ -3,6 +3,7 @@ package data
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -15,6 +16,14 @@ import (
 var mongoClient *mongo.Client
 
 const dbTimeout = 15 * time.Second
+
+func requireMongoClient() error {
+	if mongoClient == nil {
+		return errors.New("mongo client is not initialized")
+	}
+
+	return nil
+}
 
 // NewModels wires a MongoDB client into the logger data models.
 func NewModels(client *mongo.Client) Models {
@@ -36,6 +45,10 @@ type LogEntry struct {
 }
 
 func (entryModel *LogEntry) Insert(entry LogEntry) error {
+	if err := requireMongoClient(); err != nil {
+		return err
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -54,6 +67,10 @@ func (entryModel *LogEntry) Insert(entry LogEntry) error {
 }
 
 func (entryModel *LogEntry) All() ([]*LogEntry, error) {
+	if err := requireMongoClient(); err != nil {
+		return nil, err
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -90,6 +107,10 @@ func (entryModel *LogEntry) All() ([]*LogEntry, error) {
 }
 
 func (entryModel *LogEntry) GetOne(id string) (*LogEntry, error) {
+	if err := requireMongoClient(); err != nil {
+		return nil, err
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -110,6 +131,10 @@ func (entryModel *LogEntry) GetOne(id string) (*LogEntry, error) {
 }
 
 func (entryModel *LogEntry) DropCollection() error {
+	if err := requireMongoClient(); err != nil {
+		return err
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -123,6 +148,10 @@ func (entryModel *LogEntry) DropCollection() error {
 }
 
 func (entryModel *LogEntry) Update() (*mongo.UpdateResult, error) {
+	if err := requireMongoClient(); err != nil {
+		return nil, err
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
