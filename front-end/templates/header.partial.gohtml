@@ -7,7 +7,268 @@
               content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <title>Microservices in Go</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@400;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg: #f4f6f2;
+                --bg-radial-a: rgba(13, 148, 136, 0.16);
+                --bg-radial-b: rgba(15, 23, 42, 0.08);
+                --surface: rgba(255, 255, 255, 0.78);
+                --surface-solid: #ffffff;
+                --text: #19201b;
+                --muted: #5f6a62;
+                --line: #d5ddd2;
+                --accent: #0f766e;
+                --accent-strong: #0b5e57;
+                --accent-soft: #def5f2;
+                --danger: #b42318;
+                --radius-lg: 20px;
+                --radius-md: 14px;
+                --shadow: 0 16px 36px rgba(24, 32, 27, 0.08);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                margin: 0;
+                padding: 0;
+                min-height: 100%;
+            }
+
+            body {
+                font-family: "Space Grotesk", sans-serif;
+                color: var(--text);
+                background:
+                        radial-gradient(42rem 42rem at -10% -20%, var(--bg-radial-a), transparent 60%),
+                        radial-gradient(40rem 40rem at 100% 0%, var(--bg-radial-b), transparent 55%),
+                        var(--bg);
+            }
+
+            .page-shell {
+                width: min(1100px, 94vw);
+                margin: 2.4rem auto 1.8rem;
+                padding: 1.4rem;
+                background: var(--surface);
+                border: 1px solid rgba(255, 255, 255, 0.55);
+                border-radius: 28px;
+                backdrop-filter: blur(10px);
+                box-shadow: var(--shadow);
+                animation: enterUp 520ms ease-out both;
+            }
+
+            .hero {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 1rem;
+                align-items: center;
+                margin-bottom: 1.4rem;
+            }
+
+            .headline {
+                margin: 0;
+                font-family: "Sora", sans-serif;
+                font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+                letter-spacing: -0.03em;
+                line-height: 1.1;
+            }
+
+            .subhead {
+                margin: 0.55rem 0 0;
+                color: var(--muted);
+                font-size: 0.98rem;
+            }
+
+            .service-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                border: 1px solid var(--line);
+                background: var(--surface-solid);
+                border-radius: 999px;
+                padding: 0.45rem 0.8rem;
+                font-size: 0.82rem;
+                color: var(--muted);
+                white-space: nowrap;
+            }
+
+            .service-pill code {
+                font-family: "IBM Plex Mono", monospace;
+                color: var(--accent-strong);
+                font-size: 0.78rem;
+            }
+
+            .actions {
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 0.65rem;
+                margin-bottom: 1.1rem;
+            }
+
+            .action-btn {
+                width: 100%;
+                border: 1px solid var(--line);
+                background: var(--surface-solid);
+                color: var(--text);
+                border-radius: var(--radius-md);
+                padding: 0.82rem 0.78rem;
+                text-align: left;
+                font: inherit;
+                font-weight: 500;
+                cursor: pointer;
+                transition: transform 170ms ease, border-color 170ms ease, box-shadow 170ms ease, background-color 170ms ease;
+                opacity: 0;
+                transform: translateY(10px);
+                animation: staggerIn 420ms ease forwards;
+            }
+
+            .action-btn:nth-child(1) { animation-delay: 50ms; }
+            .action-btn:nth-child(2) { animation-delay: 110ms; }
+            .action-btn:nth-child(3) { animation-delay: 170ms; }
+            .action-btn:nth-child(4) { animation-delay: 230ms; }
+            .action-btn:nth-child(5) { animation-delay: 290ms; }
+
+            .action-btn:hover {
+                transform: translateY(-1px);
+                border-color: var(--accent);
+                box-shadow: 0 10px 20px rgba(15, 118, 110, 0.13);
+                background: var(--accent-soft);
+            }
+
+            .action-btn:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 2px;
+            }
+
+            .surface-grid {
+                display: grid;
+                gap: 0.85rem;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .panel {
+                border: 1px solid var(--line);
+                border-radius: var(--radius-lg);
+                background: var(--surface-solid);
+                padding: 1rem;
+            }
+
+            .panel-title {
+                margin: 0 0 0.6rem;
+                font-family: "Sora", sans-serif;
+                font-size: 1rem;
+            }
+
+            .panel-body {
+                border: 1px solid #e4ebe1;
+                border-radius: 12px;
+                background: #fbfcfb;
+                padding: 0.75rem;
+            }
+
+            #output.panel-body {
+                min-height: 140px;
+                display: grid;
+                gap: 0.45rem;
+                align-content: start;
+            }
+
+            .placeholder {
+                color: #839084;
+                font-size: 0.92rem;
+            }
+
+            .log-entry {
+                display: flex;
+                gap: 0.5rem;
+                align-items: baseline;
+                font-size: 0.92rem;
+                animation: fadeIn 200ms ease;
+            }
+
+            .log-label {
+                font-weight: 600;
+                color: var(--text);
+            }
+
+            .log-entry.is-success .log-label {
+                color: var(--accent-strong);
+            }
+
+            .log-entry.is-error .log-label {
+                color: var(--danger);
+            }
+
+            pre {
+                margin: 0;
+                min-height: 180px;
+                max-height: 300px;
+                overflow: auto;
+                white-space: pre-wrap;
+                word-break: break-word;
+                font-family: "IBM Plex Mono", monospace;
+                font-size: 0.82rem;
+                line-height: 1.5;
+            }
+
+            .footer {
+                width: min(1100px, 94vw);
+                margin: 0 auto 1.8rem;
+                color: var(--muted);
+                font-size: 0.84rem;
+                text-align: center;
+            }
+
+            @keyframes enterUp {
+                from { opacity: 0; transform: translateY(16px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            @keyframes staggerIn {
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(3px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            @media (max-width: 920px) {
+                .actions {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+
+                .surface-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                pre {
+                    min-height: 160px;
+                }
+            }
+
+            @media (max-width: 620px) {
+                .page-shell {
+                    padding: 1rem;
+                    border-radius: 20px;
+                }
+
+                .hero {
+                    grid-template-columns: 1fr;
+                }
+
+                .actions {
+                    grid-template-columns: 1fr;
+                }
+
+                .service-pill {
+                    justify-self: start;
+                }
+            }
+        </style>
 
     </head>
 

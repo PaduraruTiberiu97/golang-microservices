@@ -2,52 +2,188 @@
 {{template "base" .}}
 
 {{define "content" }}
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <h1 class="mt-5">Test microservices</h1>
-                <hr>
-                <a id="brokerBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Test Broker-service</a>
-                <a id="authBrokerBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Test Auth-service</a>
-                <a id="logBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Test Log-service</a>
-                <a id="mailBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Test Mail-service</a>
-                <a id="logGrpc" class="btn btn-outline-secondary" href="javascript:void(0);">Test Grpc</a>
+    <div class="page-shell">
+        <header class="hero">
+            <div>
+                <h1 class="headline">Microservice Control Room</h1>
+                <p class="subhead">Trigger broker workflows and inspect payloads in real time.</p>
+            </div>
+            <div class="service-pill">
+                <span>Broker</span>
+                <code>{{.BrokerURL}}</code>
+            </div>
+        </header>
 
-                <div id="output" class="mt-5" style="outline: 1px solid silver; padding: 2em;">
-                    <span class="text-muted">Output shows here...</span>
-                </div>
+        <section class="actions" aria-label="Service actions">
+            <button id="brokerBtn" class="action-btn" type="button">Ping broker</button>
+            <button id="authBrokerBtn" class="action-btn" type="button">Run auth flow</button>
+            <button id="logBtn" class="action-btn" type="button">Write log (RPC)</button>
+            <button id="mailBtn" class="action-btn" type="button">Send mail</button>
+            <button id="logGrpc" class="action-btn" type="button">Write log (gRPC)</button>
+        </section>
+
+        <section class="panel">
+            <h2 class="panel-title">Activity</h2>
+            <div id="output" class="panel-body">
+                <span class="placeholder">Run an action to see status updates.</span>
             </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <h4 class="mt-5">Sent</h4>
-                <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
-                    <pre id="payload"><span class="text-muted">Nothing sent yet...</span></pre>
+        </section>
+
+        <section class="surface-grid">
+            <article class="panel">
+                <h3 class="panel-title">Sent payload</h3>
+                <div class="panel-body">
+                    <pre id="payload"><span class="placeholder">Nothing sent yet.</span></pre>
                 </div>
-            </div>
-            <div class="col">
-                <h4 class="mt-5">Received</h4>
-                <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
-                    <pre id="received"><span class="text-muted">Nothing received yet...</span></pre>
+            </article>
+            <article class="panel">
+                <h3 class="panel-title">Received payload</h3>
+                <div class="panel-body">
+                    <pre id="received"><span class="placeholder">Nothing received yet.</span></pre>
                 </div>
-            </div>
-        </div>
+            </article>
+        </section>
     </div>
 {{end}}
 
 {{define "js"}}
     <script>
-        let brokerBtn = document.getElementById('brokerBtn')
-        let authBrokerBtn = document.getElementById('authBrokerBtn')
-        let logBtn = document.getElementById('logBtn')
-        let output = document.getElementById('output')
-        let sent = document.getElementById('payload')
-        let received = document.getElementById('received')
-        let mailBtn = document.getElementById('mailBtn')
-        let logGrpc = document.getElementById('logGrpc')
-        let brokerURL = "{{.BrokerURL}}".replace(/\/+$/, "")
+        const brokerBtn = document.getElementById('brokerBtn')
+        const authBrokerBtn = document.getElementById('authBrokerBtn')
+        const logBtn = document.getElementById('logBtn')
+        const mailBtn = document.getElementById('mailBtn')
+        const logGrpcBtn = document.getElementById('logGrpc')
 
-        mailBtn.addEventListener('click', function () {
+        const output = document.getElementById('output')
+        const sent = document.getElementById('payload')
+        const received = document.getElementById('received')
+
+        const brokerURL = "{{.BrokerURL}}".replace(/\/+$/, "")
+
+        function setPayloadView(target, value) {
+            if (typeof value === 'string') {
+                target.textContent = value
+                return
+            }
+
+            target.textContent = JSON.stringify(value, null, 4)
+        }
+
+        function appendOutput(source, message, isError = false) {
+            const placeholder = output.querySelector('.placeholder')
+            if (placeholder) {
+                placeholder.remove()
+            }
+
+            const row = document.createElement('div')
+            row.className = `log-entry ${isError ? 'is-error' : 'is-success'}`
+
+            const label = document.createElement('span')
+            label.className = 'log-label'
+            label.textContent = `${source}:`
+
+            const text = document.createElement('span')
+            text.textContent = message
+
+            row.append(label, text)
+            output.appendChild(row)
+        }
+
+        async function postJSON(path, payload) {
+            const request = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+
+            if (payload) {
+                request.body = JSON.stringify(payload)
+            }
+
+            const response = await fetch(`${brokerURL}${path}`, request)
+
+            try {
+                return await response.json()
+            } catch (error) {
+                return {
+                    error: true,
+                    message: `invalid JSON response (${response.status})`
+                }
+            }
+        }
+
+        brokerBtn.addEventListener('click', async function () {
+            try {
+                const data = await postJSON('', null)
+
+                setPayloadView(sent, 'Empty POST request')
+                setPayloadView(received, data)
+
+                if (data.error) {
+                    appendOutput('Broker', data.message, true)
+                    return
+                }
+
+                appendOutput('Broker', data.message)
+            } catch (error) {
+                appendOutput('Error', error.message, true)
+            }
+        })
+
+        authBrokerBtn.addEventListener('click', async function () {
+            const payload = {
+                action: 'auth',
+                auth: {
+                    email: 'admin@example.com',
+                    password: 'verysecret'
+                }
+            }
+
+            try {
+                const data = await postJSON('/handle', payload)
+
+                setPayloadView(sent, payload)
+                setPayloadView(received, data)
+
+                if (data.error) {
+                    appendOutput('Auth', data.message, true)
+                    return
+                }
+
+                appendOutput('Auth', data.message)
+            } catch (error) {
+                appendOutput('Error', error.message, true)
+            }
+        })
+
+        logBtn.addEventListener('click', async function () {
+            const payload = {
+                action: 'log',
+                log: {
+                    name: 'event',
+                    data: 'Some kind of data'
+                }
+            }
+
+            try {
+                const data = await postJSON('/handle', payload)
+
+                setPayloadView(sent, payload)
+                setPayloadView(received, data)
+
+                if (data.error) {
+                    appendOutput('Logger RPC', data.message, true)
+                    return
+                }
+
+                appendOutput('Logger RPC', data.message)
+            } catch (error) {
+                appendOutput('Error', error.message, true)
+            }
+        })
+
+        mailBtn.addEventListener('click', async function () {
             const payload = {
                 action: 'mail',
                 mail: {
@@ -58,124 +194,24 @@
                 }
             }
 
-            const headers = new Headers();
-            headers.append("Content-Type", "application/json")
+            try {
+                const data = await postJSON('/handle', payload)
 
-            const body = {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: headers
-            }
+                setPayloadView(sent, payload)
+                setPayloadView(received, data)
 
-            fetch(`${brokerURL}/handle`, body)
-                .then((res) => res.json())
-                .then((data) => {
-                    sent.innerHTML = JSON.stringify(payload, undefined, 4)
-                    received.innerHTML = JSON.stringify(data, undefined, 4)
-
-                    if (data.error) {
-                        console.log(data.error + ' ' + data.message)
-                    } else {
-                        output.innerHTML += `<br><strong> Response from mail-service:</strong> ${data.message}`
-                    }
-                })
-                .catch((err) => {
-                    output.innerHTML += `<br><strong class="text-danger"> Error:</strong> ${err.message}`
-                })
-        })
-
-        logBtn.addEventListener('click', function () {
-            const payload = {
-                action: 'log',
-                log: {
-                    name: 'event',
-                    data: 'Some kind of data'
+                if (data.error) {
+                    appendOutput('Mail', data.message, true)
+                    return
                 }
+
+                appendOutput('Mail', data.message)
+            } catch (error) {
+                appendOutput('Error', error.message, true)
             }
-
-            const headers = new Headers();
-            headers.append("Content-Type", "application/json")
-
-            const body = {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: headers
-            }
-
-            fetch(`${brokerURL}/handle`, body)
-                .then((res) => res.json())
-                .then((data) => {
-                    sent.innerHTML = 'Empty post request'
-                    received.innerHTML = JSON.stringify(data, undefined, 4)
-
-                    if (data.error) {
-                        console.log(data.error + ' ' + data.message)
-                    } else {
-                        output.innerHTML += `<br><strong> Response from logger-service:</strong> ${data.message}`
-                    }
-                })
-                .catch((err) => {
-                    output.innerHTML += `<br><strong class="text-danger"> Error:</strong> ${err.message}`
-                })
         })
 
-        brokerBtn.addEventListener('click', function () {
-            const body = {
-                method: "POST"
-            }
-            fetch(brokerURL, body)
-                .then((res) => res.json())
-                .then((data) => {
-                    sent.innerHTML = 'Empty post request'
-                    received.innerHTML = JSON.stringify(data, undefined, 4)
-
-                    if (data.error) {
-                        console.log(data.error + ' ' + data.message)
-                    } else {
-                        output.innerHTML += `<br><strong> Response from broker-service:</strong> ${data.message}`
-                    }
-                })
-                .catch((err) => {
-                    output.innerHTML += `<br><strong class="text-danger"> Error:</strong> ${err.message}`
-                })
-        })
-
-        authBrokerBtn.addEventListener('click', function () {
-            const payload = {
-                action: "auth",
-                auth: {
-                    email: "admin@example.com",
-                    password: "verysecret"
-                }
-            }
-
-            const headers = new Headers()
-            headers.append("Content-Type", "application/json")
-
-            const body = {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: headers
-            }
-
-            fetch(`${brokerURL}/handle`, body)
-                .then((res) => res.json())
-                .then((data) => {
-                    sent.innerHTML = JSON.stringify(payload, undefined, 4)
-                    received.innerHTML = JSON.stringify(data, undefined, 4)
-
-                    if (data.error) {
-                        output.innerHTML += `<br><strong>Error:</strong> ${data.message}`
-                    } else {
-                        output.innerHTML += `<br><strong> Response from broker-service:</strong> ${data.message}`
-                    }
-                })
-                .catch((err) => {
-                    output.innerHTML += `<br><strong class="text-danger"> Error:</strong> ${err.message}`
-                })
-        })
-
-        logGrpc.addEventListener('click', function () {
+        logGrpcBtn.addEventListener('click', async function () {
             const payload = {
                 action: 'log',
                 log: {
@@ -184,30 +220,21 @@
                 }
             }
 
-            const headers = new Headers();
-            headers.append("Content-Type", "application/json")
+            try {
+                const data = await postJSON('/log-grpc', payload)
 
-            const body = {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: headers
+                setPayloadView(sent, payload)
+                setPayloadView(received, data)
+
+                if (data.error) {
+                    appendOutput('Logger gRPC', data.message, true)
+                    return
+                }
+
+                appendOutput('Logger gRPC', data.message)
+            } catch (error) {
+                appendOutput('Error', error.message, true)
             }
-
-            fetch(`${brokerURL}/log-grpc`, body)
-                .then((res) => res.json())
-                .then((data) => {
-                    sent.innerHTML = JSON.stringify(payload, undefined, 4)
-                    received.innerHTML = JSON.stringify(data, undefined, 4)
-
-                    if (data.error) {
-                        output.innerHTML += `<br><strong class="text-danger"> Error:</strong> ${data.message}`
-                    } else {
-                        output.innerHTML += `<br><strong> Response from logger-service:</strong> ${data.message}`
-                    }
-                })
-                .catch((err) => {
-                    output.innerHTML += `<br><strong class="text-danger"> Error:</strong> ${err.message}`
-                })
         })
     </script>
 {{end}}
