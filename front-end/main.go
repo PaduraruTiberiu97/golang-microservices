@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const defaultFrontendPort = "8081"
+
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
@@ -20,9 +22,10 @@ func main() {
 		renderTemplate(w, "test.page.gohtml")
 	})
 
-	fmt.Println("Starting front end service on port 8081")
+	frontendPort := frontendPortFromEnv()
+	fmt.Printf("Starting front end service on port %s\n", frontendPort)
 	server := &http.Server{
-		Addr:              ":8081",
+		Addr:              ":" + frontendPort,
 		Handler:           nil,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
@@ -68,4 +71,12 @@ func brokerURLFromEnv() string {
 	}
 
 	return "http://localhost:8000"
+}
+
+func frontendPortFromEnv() string {
+	if value := os.Getenv("FRONTEND_PORT"); value != "" {
+		return value
+	}
+
+	return defaultFrontendPort
 }

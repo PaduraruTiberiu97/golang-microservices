@@ -65,6 +65,7 @@ AUTH_BINARY=authApp
 LOGGER_BINARY=loggerServiceApp
 MAILER_BINARY=mailerApp
 LISTENER_BINARY=listenerApp
+FRONTEND_PORT ?= 8082
 
 ## up: starts all containers in the background without forcing build
 up:
@@ -135,8 +136,9 @@ build_front:
 
 ## start: build and start the front end
 start: build_front
-	@echo "Starting front end..."
-	cd ../front-end && ./$(FRONT_END_BINARY) &
+	@echo "Starting front end on port $(FRONTEND_PORT)..."
+	@pkill -f "$(FRONT_END_BINARY)" || true
+	cd ../front-end && FRONTEND_PORT=$(FRONTEND_PORT) ./$(FRONT_END_BINARY) &
 
 ## stop: stop the front end
 stop:

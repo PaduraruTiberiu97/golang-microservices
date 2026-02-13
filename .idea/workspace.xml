@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="f0d80dc1-35b7-4b6f-8b4a-93fe390e4b77" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/broker-service/brokerApp" beforeDir="false" afterPath="$PROJECT_DIR$/broker-service/brokerApp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/main_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/main_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/templates/footer.partial.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/footer.partial.gohtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/templates/header.partial.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/header.partial.gohtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/templates/test.page.gohtml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

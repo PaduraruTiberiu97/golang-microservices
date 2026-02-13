@@ -26,6 +26,24 @@ func TestBrokerURLFromEnvUsesEnvironmentValue(t *testing.T) {
 	}
 }
 
+func TestFrontendPortFromEnvUsesDefaultWhenUnset(t *testing.T) {
+	t.Setenv("FRONTEND_PORT", "")
+
+	port := frontendPortFromEnv()
+	if port != "8081" {
+		t.Fatalf("expected default frontend port, got %q", port)
+	}
+}
+
+func TestFrontendPortFromEnvUsesEnvironmentValue(t *testing.T) {
+	t.Setenv("FRONTEND_PORT", "8099")
+
+	port := frontendPortFromEnv()
+	if port != "8099" {
+		t.Fatalf("expected env frontend port, got %q", port)
+	}
+}
+
 func TestRenderTemplateRendersDashboard(t *testing.T) {
 	rr := httptest.NewRecorder()
 

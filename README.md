@@ -52,6 +52,7 @@ This repository is a Go microservices playground with six services and two deplo
 
 ### `front-end`
 - `BROKER_URL` (example: `http://localhost:8000`; defaults to this value when unset)
+- `FRONTEND_PORT` (default: `8081`)
 
 ### `broker-service`
 - `AUTH_SERVICE_URL` (default: `http://authentication-service/authenticate`)
@@ -95,11 +96,11 @@ make up_build
 2. Run front-end locally (outside compose):
 ```bash
 cd ../front-end
-BROKER_URL=http://localhost:8000 go run .
+FRONTEND_PORT=8082 BROKER_URL=http://localhost:8000 go run .
 ```
 
 3. Open:
-- `http://localhost:8081` (front-end UI)
+- `http://localhost:8082` (front-end UI, using the command above)
 - `http://localhost:8025` (MailHog UI, if running through compose)
 
 4. Stop stack:
