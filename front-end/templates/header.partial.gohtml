@@ -68,6 +68,14 @@
                 margin-bottom: 1.4rem;
             }
 
+            .hero-tools {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.6rem;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
             .headline {
                 margin: 0;
                 font-family: "Sora", sans-serif;
@@ -99,6 +107,32 @@
                 font-family: "IBM Plex Mono", monospace;
                 color: var(--accent-strong);
                 font-size: 0.78rem;
+            }
+
+            .inbox-link {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid var(--accent);
+                background: var(--accent);
+                color: #f7fbfa;
+                border-radius: 999px;
+                padding: 0.45rem 0.9rem;
+                font-size: 0.82rem;
+                font-weight: 600;
+                text-decoration: none;
+                transition: transform 170ms ease, box-shadow 170ms ease, background-color 170ms ease;
+            }
+
+            .inbox-link:hover {
+                transform: translateY(-1px);
+                background: var(--accent-strong);
+                box-shadow: 0 10px 20px rgba(15, 118, 110, 0.22);
+            }
+
+            .inbox-link:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 2px;
             }
 
             .actions {
@@ -147,6 +181,7 @@
                 display: grid;
                 gap: 0.85rem;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
+                margin-top: 1.25rem;
             }
 
             .panel {
@@ -264,7 +299,12 @@
                     grid-template-columns: 1fr;
                 }
 
-                .service-pill {
+                .hero-tools {
+                    justify-content: flex-start;
+                }
+
+                .service-pill,
+                .inbox-link {
                     justify-self: start;
                 }
             }

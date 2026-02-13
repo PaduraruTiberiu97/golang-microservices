@@ -26,6 +26,24 @@ func TestBrokerURLFromEnvUsesEnvironmentValue(t *testing.T) {
 	}
 }
 
+func TestMailInboxURLFromEnvUsesDefaultWhenUnset(t *testing.T) {
+	t.Setenv("MAIL_INBOX_URL", "")
+
+	url := mailInboxURLFromEnv()
+	if url != "http://localhost:8025" {
+		t.Fatalf("expected default inbox URL, got %q", url)
+	}
+}
+
+func TestMailInboxURLFromEnvUsesEnvironmentValue(t *testing.T) {
+	t.Setenv("MAIL_INBOX_URL", "http://mail.example.com")
+
+	url := mailInboxURLFromEnv()
+	if url != "http://mail.example.com" {
+		t.Fatalf("expected env inbox URL, got %q", url)
+	}
+}
+
 func TestFrontendPortFromEnvUsesDefaultWhenUnset(t *testing.T) {
 	t.Setenv("FRONTEND_PORT", "")
 

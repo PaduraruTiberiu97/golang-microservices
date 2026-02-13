@@ -55,10 +55,12 @@ func renderTemplate(w http.ResponseWriter, pageTemplate string) {
 	}
 
 	var data struct {
-		BrokerURL string
+		BrokerURL    string
+		MailInboxURL string
 	}
 
 	data.BrokerURL = brokerURLFromEnv()
+	data.MailInboxURL = mailInboxURLFromEnv()
 
 	if err := tmpl.Execute(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -71,6 +73,14 @@ func brokerURLFromEnv() string {
 	}
 
 	return "http://localhost:8000"
+}
+
+func mailInboxURLFromEnv() string {
+	if value := os.Getenv("MAIL_INBOX_URL"); value != "" {
+		return value
+	}
+
+	return "http://localhost:8025"
 }
 
 func frontendPortFromEnv() string {
